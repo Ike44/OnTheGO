@@ -8,6 +8,7 @@ import Homeseven from '../Components/Home/Homeseven'
 import Homesix from '../Components/Home/Homesix'
 import Homethree from '../Components/Home/Homethree'
 import Hometwo from '../Components/Home/Hometwo'
+import Home_Countries from '../Components/Home/Home_Countries'
 
 const Home = () => {
   return (
@@ -20,6 +21,7 @@ const Home = () => {
       <Homesix />
       <Homeseven />
       <Homeeight />
+      <Home_Countries />
     </Box>
   )
 }
