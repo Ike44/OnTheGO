@@ -40,6 +40,11 @@ function Homesix() {
             id: 7,
             img: "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/1b/33/f4/33/caption.jpg?w=300&h=300&s=1",
             title: "Thailand"
+        },
+        {
+            id: 8,
+            img: "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/15/f0/6b/18/gita-fuori-porta-avevo.jpg?w=300&h=300&s=1",
+            title: "Italy"
         }
     ];
 
