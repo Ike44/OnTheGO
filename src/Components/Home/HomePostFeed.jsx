@@ -90,7 +90,7 @@ const HomePostFeed = () => {
   return (
     <Box w="85%" m="auto" textAlign="left" mt="40px">
       <Heading as="h2" size="xl" mb={6}>Feed</Heading>
-      <VStack spacing={8} w="100%" p={4}>
+      <VStack spacing={8} w="100%" p={0}>
         {samplePosts.map(post => (
           <Post key={post.id} post={post} />
         ))}
