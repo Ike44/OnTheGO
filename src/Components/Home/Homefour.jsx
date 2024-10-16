@@ -43,7 +43,7 @@ function Homefour(){
                     <Image src={el.img} alt="" />
                     <Text fontWeight="600" fontSize='md'>{el.title}</Text>
                     <Box w="110px" display="flex" gap="2px" alignItems="center">
-                        <Box boxSize="12px" bg="green.400" rounded="50%" border="none"></Box>
+                    <Box boxSize="12px" bg="green.400" rounded="50%" border="none"></Box>
                         <Box boxSize="12px" bg="green.400" rounded="50%" border="none"></Box>
                         <Box boxSize="12px" bg="green.400" rounded="50%" border="none"></Box>
                         <Box boxSize="12px" bg="green.400" rounded="50%" border="none"></Box>
