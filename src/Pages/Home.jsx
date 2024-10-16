@@ -9,19 +9,21 @@ import Homesix from '../Components/Home/Homesix'
 import Homethree from '../Components/Home/Homethree'
 import Hometwo from '../Components/Home/Hometwo'
 import HomeCountries from '../Components/Home/HomeCountries'
+import HomePostFeed from '../Components/Home/HomePostFeed'
 
 const Home = () => {
   return (
     <Box>
       <Homeone />
-      <Hometwo />
-      <Homethree />
-      <Homefour />
-      <Homefive />
-      <Homesix />
+      {/* <Hometwo /> */}
+      {/* <Homethree /> */}
+      {/* <Homefour /> */}
+      {/* <Homefive /> */}
+      {/* <Homesix /> */}
+      <HomeCountries />
+      <HomePostFeed />
       <Homeseven />
       <Homeeight />
-      <HomeCountries />
     </Box>
   )
 }

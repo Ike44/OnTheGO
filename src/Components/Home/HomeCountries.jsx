@@ -56,7 +56,7 @@ function HomeCountries() {
 
     return (
         <Box w="85%" m="auto" pt="15px" textAlign="left" mt="40px" position="relative">
-            <Text fontWeight="700" fontSize='2xl'>Countries to Explore</Text>
+            <Text fontWeight="700" fontSize='3xl'>Countries to Explore</Text>
             <Text fontSize='md'>Recommended countries to explore</Text>
             <Box position="relative">
                 <IconButton
