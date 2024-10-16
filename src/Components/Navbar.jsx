@@ -1,10 +1,10 @@
 // Sign in/up code is commented out
 import { Box, Link, Text, Menu, MenuButton, MenuList, MenuItem, IconButton, useDisclosure } from "@chakra-ui/react";
-// import { Button } from "@chakra-ui/react";
+import { Button } from "@chakra-ui/react";
 import ModeEditOutlineOutlinedIcon from '@mui/icons-material/ModeEditOutlineOutlined';
 import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
-// import Signin from "./Signin";
+import Signin from "./Signin";
 import { useEffect, useState } from "react";
 
 
@@ -27,7 +27,7 @@ function Navbar() {
         };
     }, []);
 
-    // const [isAuth, setAuth]= useState(false);
+    const [isAuth, setAuth]= useState(false);
 
 
     return (
@@ -61,13 +61,13 @@ function Navbar() {
                         <MenuItem>Bookmarks</MenuItem>
                     </MenuList>
                 </Menu> 
-                {/* <Link display="flex">
+                <Link display="flex">
                     {isAuth ? 
                     <Button color="black" onClick={()=>{
                         setAuth(!isAuth);
                     }}>Sanghamitra</Button> : <Signin />
                 }
-                </Link>  */}
+                </Link> 
                 </Box>
             </Box>
         </Box>
