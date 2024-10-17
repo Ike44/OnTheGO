@@ -6,6 +6,7 @@ import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined
 import MenuBookIcon from '@mui/icons-material/MenuBook';
 import Signin from "./Signin";
 import { useEffect, useState } from "react";
+import { Link as RouterLink } from "react-router-dom";
 
 
 function Navbar() {
@@ -33,20 +34,21 @@ function Navbar() {
     return (
         <Box w="full" boxShadow={isscroll ? 'md' : "sm"} position="fixed" bg="#FFFFFF" zIndex={1} p="3px 0px">
             <Box h="60px" w="85%" m="auto" display="flex" alignItems="center" justifyContent="space-between">
-                <Link href="/">
+                <RouterLink to="/">
                     <img src="/otg.png" alt="pls show D:" style={{ width: '175px', height: '60px' }} />
-                    </Link> 
+                    </RouterLink> 
                         <Box display="flex" gap="25px" alignItems="center">
                     <Link display="flex">
                         <ModeEditOutlineOutlinedIcon />
                         <Text fontWeight="500" fontSize='md'>Create a Post</Text>
                     </Link>
+                    <RouterLink to="/planner">
                     <Link display="flex" alignItems="center" gap="5px">
                         <MenuBookIcon />
 
                         <Text fontWeight="500" fontSize='md'>My Planner</Text>
                 </Link>
-                    
+                </RouterLink>
                     
                 <Menu isOpen={isOpen}>
                     <MenuButton
