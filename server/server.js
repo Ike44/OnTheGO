@@ -5,6 +5,7 @@ const postRoutes = require('./routes/postsRoutes');
 const plannerRoutes = require('./routes/plannerRoutes');
 const commentsRoute = require('./routes/commentsRoutes');
 const bookmarkRoutes = require('./routes/bookmarksRoutes');
+require('dotenv').config(); // Load environment variables from .env file
 
 const app = express();
 app.use(cors());
@@ -14,7 +15,7 @@ app.use('/api/planner', plannerRoutes);
 app.use('/api/comments', commentsRoute);
 app.use('/api/bookmarks', bookmarkRoutes);
 
-const mongoURI = 'mongodb+srv://OnTheGoDevs:OnTheGoDevs1@onthego.gpg4a.mongodb.net/?retryWrites=true&w=majority&appName=OnTheGo';
+const mongoURI = process.env.MONGO_URI;
 
 mongoose.connect(mongoURI, {
 }).then(() => {
