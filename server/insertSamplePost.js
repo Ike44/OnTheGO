@@ -1,7 +1,8 @@
 const mongoose = require('mongoose');
 const Post = require('./models/posts');
+require('dotenv').config(); // Load environment variables from .env file
 
-const mongoURI = 'mongodb+srv://OnTheGoDevs:OnTheGoDevs1@onthego.gpg4a.mongodb.net/onthegoDB?retryWrites=true&w=majority';
+const mongoURI = process.env.MONGO_URI;
 
 mongoose.connect(mongoURI, {
   useNewUrlParser: true,
