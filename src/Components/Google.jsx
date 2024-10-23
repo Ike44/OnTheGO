@@ -21,7 +21,7 @@ export function getPlaceSuggestions(query) {
         }
 
         autocompleteService.getPlacePredictions(
-            { input: query, types: ['tourist_attraction'] },
+            { input: query, types: [] },
             (predictions, status) => {
                 if (status !== window.google.maps.places.PlacesServiceStatus.OK) {
                     reject(new Error('Failed to fetch suggestions'));
