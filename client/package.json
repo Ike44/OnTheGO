@@ -1,5 +1,5 @@
 {
-  "name": "tripadvisor",
+  "name": "onthego",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -15,6 +15,7 @@
     "axios": "^0.27.2",
     "dotenv": "^16.4.5",
     "express": "^4.21.1",
+    "find-config": "^1.0.0",
     "framer-motion": "^7.4.0",
     "homepage": ".",
     "install": "^0.13.0",

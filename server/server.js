@@ -5,7 +5,8 @@ const postRoutes = require('./routes/postsRoutes');
 const plannerRoutes = require('./routes/plannerRoutes');
 const commentsRoute = require('./routes/commentsRoutes');
 const bookmarkRoutes = require('./routes/bookmarksRoutes');
-require('dotenv').config(); // Load environment variables from .env file
+// require('dotenv').config(); // Load environment variables from .env file
+require('dotenv').config({ path: require('find-config')('.env') })
 
 const app = express();
 app.use(cors());

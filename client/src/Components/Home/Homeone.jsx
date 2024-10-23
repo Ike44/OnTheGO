@@ -2,7 +2,7 @@ import { SearchIcon } from "@chakra-ui/icons";
 import { Box, Input, List, ListItem, VStack } from "@chakra-ui/react";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { getPlaceSuggestions, initGoogleMapsAPI } from "../Google";
+import { getPlaceSuggestions, initGoogleMapsAPI } from "../../google/Google";
 
 function Homeone() {
     const [query, setQuery] = useState("");
