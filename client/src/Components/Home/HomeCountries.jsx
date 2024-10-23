@@ -1,9 +1,11 @@
 import React, { useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { Box, Image, Text, IconButton, Link } from "@chakra-ui/react";
-import { ChevronLeftIcon, ChevronRightIcon } from "@chakra-ui/icons";
+import { ChevronLeftIcon, ChevronRightIcon, StarIcon } from "@chakra-ui/icons";
 
 function HomeCountries() {
     const scrollRef = useRef(null);
+    const navigate = useNavigate();
 
     const data = [
         {
@@ -54,6 +56,17 @@ function HomeCountries() {
         }
     };
 
+    const handleBookmark = (country) => {
+        const storedBookmarks = localStorage.getItem("bookmarks");
+        let bookmarks = storedBookmarks ? JSON.parse(storedBookmarks) : [];
+
+        bookmarks.push(country);
+        localStorage.setItem("bookmarks", JSON.stringify(bookmarks));
+
+        // Redirect to Bookmarks page
+        navigate("/bookmarks");
+    };
+
     return (
         <Box w="85%" m="auto" pt="15px" textAlign="left" mt="40px" position="relative">
             <Text fontWeight="700" fontSize='3xl'>Countries to Explore</Text>
@@ -85,25 +98,36 @@ function HomeCountries() {
                     }}
                 >
                     {data && data.map((el) => (
-                        <Link 
-                            key={el.id} 
-                            href={`?country=${el.title.toLowerCase().replace(' ', '-')}`}
-                            _hover={{ textDecoration: 'none' }}
-                        >
-                            <Box 
-                                bg="white" 
-                                pb="30px" 
-                                position="relative" 
-                                textAlign="left"
-                                flexShrink="0"
-                                w="300px"
-                                transition="transform 0.3s ease-in-out"
-                                _hover={{ transform: "scale(1.05)" }}
-                            >
-                                <Image filter='auto' brightness='65%' src={el.img} alt="img" w="100%" h="300px" objectFit="cover" />
-                                <Text left="10px" color="white" position="absolute" bottom="30px" fontWeight="900" fontSize='3xl'>{el.title}</Text>
-                            </Box>
-                        </Link>
+            <Box key={el.id} position="relative">
+            <Link 
+                href={`?country=${el.title.toLowerCase().replace(' ', '-')}`} 
+                _hover={{ textDecoration: 'none' }}
+            >
+                <Box 
+                    bg="white" 
+                    pb="30px" 
+                    position="relative" 
+                    textAlign="left"
+                    flexShrink="0"
+                    w="300px"
+                    transition="transform 0.3s ease-in-out"
+                    _hover={{ transform: "scale(1.05)" }}
+                >
+                    <Image filter='auto' brightness='65%' src={el.img} alt="img" w="100%" h="300px" objectFit="cover" />
+                    <Text left="10px" color="white" position="absolute" bottom="30px" fontWeight="900" fontSize='3xl'>{el.title}</Text>
+                </Box>
+            </Link>
+            
+            <IconButton
+                aria-label="Bookmark country"
+                icon={<StarIcon />}
+                position="absolute"
+                right="10px"
+                top="10px"
+                color="yellow"
+                onClick={() => handleBookmark({ title: el.title, img: el.img })}
+            />
+            </Box>
                     ))}
                 </Box>
                 <IconButton
@@ -119,6 +143,6 @@ function HomeCountries() {
             </Box>
         </Box>
     );
-}
+                    }
 
 export default HomeCountries;
