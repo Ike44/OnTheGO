@@ -1,0 +1,11 @@
+# Ignore all node_modules directories
+**/node_modules/
+
+# Ignore environment variable files
+*.env
+
+# Other common ignores
+.DS_Store
+dist/
+build/
+coverage/

@@ -1,4 +1,4 @@
-import { GOOGLE_API_KEY} from '../config';
+import { GOOGLE_API_KEY} from './config';
 
 let autocompleteService = null;
 
