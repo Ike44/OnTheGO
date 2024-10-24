@@ -1,10 +1,8 @@
-import { GOOGLE_API_KEY } from '../config.js';
-
 let autocompleteService = null;
 
 export function initGoogleMapsAPI() {
     const script = document.createElement('script');
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_API_KEY}&libraries=places`;
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.REACT_APP_GOOGLE_API_KEY}&libraries=places`;
     script.async = true;
     script.defer = true;
     script.onload = () => {
