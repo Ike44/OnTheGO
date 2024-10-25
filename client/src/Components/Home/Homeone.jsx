@@ -32,13 +32,13 @@ function Homeone() {
 
     const handleSuggestionClick = (description) => {
         const formattedQuery = description.replace(/\s+/g, '+');
-        navigate(`/search?q=${formattedQuery}`);
+        navigate(`/searchResults?q=${formattedQuery}`); 
     };
 
     const handleSearch = (e) => {
         e.preventDefault();
         if (query.trim()) {
-            navigate(`/searchResults?q=${query.trim().replace(/\s+/g, '+')}`);
+            navigate(`/searchResults?q=${query.trim().replace(/\s+/g, '+')}`); 
         }
     };
 
