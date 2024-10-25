@@ -1,6 +1,7 @@
 import { Box, Text, Link, Icon } from "@chakra-ui/react";
 import { FaInstagram, FaFacebook, FaTwitter } from "react-icons/fa";
 
+
 function Footer() {
   return (
     <Box textAlign="center" bg="#FFFFFF" p="30px 0px">
@@ -19,6 +20,12 @@ function Footer() {
             <Icon as={FaTwitter} boxSize={6} />
           </Link>
         </Box>
+        <Box mt="20px">
+          <Link href="/contactUs" fontSize="lg" color="black.500">
+            Contact Us
+          </Link>
+        </Box>
+
       </Box>
     </Box>
   );

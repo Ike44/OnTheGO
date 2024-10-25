@@ -3,6 +3,8 @@ import { ArrowUpIcon, ArrowDownIcon, StarIcon } from '@chakra-ui/icons'
 import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import axios from 'axios'
+import SubNav from '../Subnav';
+
 
 const HomePostFeed = () => {
   const [posts, setPosts] = useState([])
@@ -22,7 +24,8 @@ const HomePostFeed = () => {
 
   return (
     <Box w="85%" m="auto" textAlign="left" mt="40px">
-      <Heading as="h2" size="xl" mb={6}>Feed</Heading>
+      <Heading as="h2" size="xl" mb={-20}>Feed</Heading>
+      <SubNav />
       <VStack spacing={8} w="100%" p={0}>
         {posts.map(post => (
           <Post key={post._id} post={post} />
