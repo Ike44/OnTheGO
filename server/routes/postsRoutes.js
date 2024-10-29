@@ -17,7 +17,7 @@ router.post('/', async (req, res) => {
 router.get('/', async (req, res) => {
   try {
     const posts = await Post.find();
-    console.log('Fetched posts:', posts); // Add logging
+    // console.log('Fetched posts:', posts); // Add logging
     if (posts.length === 0) {
       console.log('No posts found');
     }

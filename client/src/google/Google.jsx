@@ -1,8 +1,22 @@
+import React, { useEffect, useState } from 'react';
+
 let autocompleteService = null;
 
-export function initGoogleMapsAPI() {
+async function fetchApiKey() {
+    try {
+        const response = await fetch('http://localhost:3001/api/google-api-key');
+        const data = await response.json();
+        return data.key;
+    } catch (error) {
+        console.error('Error fetching API key:', error);
+        throw new Error('Failed to fetch API key');
+    }
+}
+
+export async function initGoogleMapsAPI() {
+    const apiKey = await fetchApiKey();
     const script = document.createElement('script');
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.GOOGLE_API_KEY}&libraries=places`;
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
     script.async = true;
     script.defer = true;
     script.onload = () => {
@@ -35,3 +49,19 @@ export function getPlaceSuggestions(query) {
         );
     });
 }
+
+// export function GoogleMapsComponent() {
+//     const [apiKey, setApiKey] = useState(null);
+
+//     useEffect(() => {
+//         const initializeGoogleMaps = async () => {
+//             try {
+//                 await initGoogleMapsAPI();
+//             } catch (error) {
+//                 console.error('Error initializing Google Maps API:', error);
+//             }
+//         };
+
+//         initializeGoogleMaps();
+//     }, []);
+// }
