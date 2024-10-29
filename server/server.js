@@ -11,6 +11,7 @@ const commentsRoute = require('./routes/commentsRoutes');
 const bookmarkRoutes = require('./routes/bookmarksRoutes');
 const apiRoutes = require('./routes/apiRoutes');
 
+
 const app = express();
 app.use(cors());
 app.use(express.json());

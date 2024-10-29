@@ -36,19 +36,14 @@ function Navbar() {
             <Box h="60px" w="85%" m="auto" display="flex" alignItems="center" justifyContent="space-between">
                 <RouterLink to="/">
                     <img src="/otg.png" alt="pls show D:" style={{ width: '175px', height: '60px' }} />
-                    </RouterLink> 
-                        <Box display="flex" gap="25px" alignItems="center">
-                    <Link display="flex">
-                        <ModeEditOutlineOutlinedIcon />
-                        <Text fontWeight="500" fontSize='md'>Create a Post</Text>
-                    </Link>
-                    <RouterLink to="/planner">
-                    <Link display="flex" alignItems="center" gap="5px">
-                        <MenuBookIcon />
-
-                        <Text fontWeight="500" fontSize='md'>My Planner</Text>
-                </Link>
-                </RouterLink>
+                </RouterLink> 
+                <Box display="flex" gap="25px" alignItems="center">
+                    <RouterLink to="/create-post">
+                        <Link display="flex">
+                            <ModeEditOutlineOutlinedIcon />
+                            <Text fontWeight="500" fontSize='md'>Create a Post</Text>
+                        </Link>
+                    </RouterLink>
                     
                 <Menu isOpen={isOpen}>
                     <MenuButton
