@@ -49,19 +49,3 @@ export function getPlaceSuggestions(query) {
         );
     });
 }
-
-// export function GoogleMapsComponent() {
-//     const [apiKey, setApiKey] = useState(null);
-
-//     useEffect(() => {
-//         const initializeGoogleMaps = async () => {
-//             try {
-//                 await initGoogleMapsAPI();
-//             } catch (error) {
-//                 console.error('Error initializing Google Maps API:', error);
-//             }
-//         };
-
-//         initializeGoogleMaps();
-//     }, []);
-// }
