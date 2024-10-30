@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
 let autocompleteService = null;
+let placesService = null;
 
 async function fetchApiKey() {
     try {
@@ -21,6 +22,7 @@ export async function initGoogleMapsAPI() {
     script.defer = true;
     script.onload = () => {
         autocompleteService = new window.google.maps.places.AutocompleteService();
+        placesService = new window.google.maps.places.PlacesService(document.createElement('div'));
     };
     document.head.appendChild(script);
 }
@@ -39,13 +41,30 @@ export function getPlaceSuggestions(query) {
                     reject(new Error('Failed to fetch suggestions'));
                     return;
                 }
-
                 const suggestions = predictions.map(prediction => ({
-                    description: prediction.description
+                    description: prediction.description,
+                    place_id: prediction.place_id
                 })).slice(0, 5);
 
                 resolve(suggestions);
             }
         );
+    });
+}
+
+export function getPlaceDetails(placeId) {
+    return new Promise((resolve, reject) => {
+        if (!placesService) {
+            reject(new Error('Google Maps API not loaded'));
+            return;
+        }
+
+        placesService.getDetails({ placeId }, (place, status) => {
+            if (status !== window.google.maps.places.PlacesServiceStatus.OK) {
+                reject(new Error('Failed to fetch place details'));
+                return;
+            }
+            resolve(place);
+        });
     });
 }
