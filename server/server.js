@@ -22,6 +22,7 @@ app.use('/api', apiRoutes);
 
 const mongoURI = process.env.MONGO_URI;
 
+mongoose.set('debug', true);
 mongoose.connect(mongoURI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
