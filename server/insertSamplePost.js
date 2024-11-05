@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const Post = require('./models/posts');
-require('dotenv').config(); // Load environment variables from .env file
+require('dotenv').config({ path: require('find-config')('.env') }) // Load environment variables from .env file
 
 const mongoURI = process.env.MONGO_URI;
 
