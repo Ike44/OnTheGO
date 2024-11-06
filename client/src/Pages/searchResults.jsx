@@ -2,9 +2,9 @@ import { SearchIcon } from "@chakra-ui/icons";
 import { Box, Heading, Text, Link, VStack, HStack, Icon } from "@chakra-ui/react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { useRef } from "react";
 import { initGoogleMapsAPI, getPlaceDetails } from '../google/Google';
 import SearchSuggestions from "../google/SearchSuggestions";
+import Map from "../google/Map";
 
 function SearchResults() {
   const navigate = useNavigate();
@@ -12,8 +12,6 @@ function SearchResults() {
   const [searchTerm, setSearchTerm] = useState("");
   const [displayedTerm, setDisplayedTerm] = useState("");
   const [placeDetails, setPlaceDetails] = useState(null);
-  const mapRef = useRef(null);
-  const mapInstanceRef = useRef(null);
 
   useEffect(() => {
     const initializeGoogleMaps = async () => {
@@ -38,23 +36,6 @@ function SearchResults() {
     if (placeId) {
       getPlaceDetails(placeId).then(details => {
         setPlaceDetails(details);
-        if (details && details.geometry && window.google) {
-          const { location } = details.geometry;
-          const mapOptions = {
-            center: { lat: location.lat(), lng: location.lng() },
-            zoom: 15
-          };
-
-          if (!mapInstanceRef.current && mapRef.current) {
-            mapInstanceRef.current = new window.google.maps.Map(mapRef.current, mapOptions);
-            
-            new window.google.maps.Marker({
-              position: { lat: location.lat(), lng: location.lng() },
-              map: mapInstanceRef.current,
-              title: details.name
-            });
-          }
-        }
       }).catch(error => {
         console.error('Error fetching place details:', error);
       });
@@ -119,7 +100,7 @@ function SearchResults() {
           </a>
         )}
         <Box p="4" bg="white" boxShadow="md" borderRadius="md" flex="1" ml="4" minHeight="500px">
-          <div ref={mapRef} style={{ width: '100%', height: '100%' }}></div>
+          <Map placeDetails={placeDetails} />
         </Box>
       </Box>
       <Box textAlign="left" mt={6} ml={4}>
