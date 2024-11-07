@@ -4,6 +4,7 @@ const Post = require('../models/posts');
 
 // Create a new post - POST
 router.post('/', async (req, res) => {
+  console.log("Received post data:", req.body);
   const post = new Post(req.body);
   try {
     const savedPost = await post.save();
@@ -40,5 +41,17 @@ router.delete('/:id', async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 });
+
+// get single post
+router.get('/:id', async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.id);
+    if (!post) res.status(404).json({ message: 'Post not found' });
+    res.json(post);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 
 module.exports = router;

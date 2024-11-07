@@ -4,6 +4,9 @@ import Hotel from "../Pages/Hotel";
 import MyPlanner from "../Pages/MyPlanner";
 import ContactUs from '../Pages/contactUs';
 import SearchResults from '../Pages/searchResults';
+import CreatePost from "../Pages/CreatePost";
+import ViewPost from '../Pages/ViewPost';
+
 
 
 function AllRoutes(){
@@ -13,6 +16,9 @@ function AllRoutes(){
         <Route path="/planner" element={<MyPlanner />} ></Route>
         <Route path="/contactUs" element={<ContactUs />} />
         <Route path="/searchResults" element={<SearchResults />} />
+
+        <Route path="/create-post" element={<CreatePost />} ></Route> 
+        <Route path="/view-post/:postId" element={<ViewPost />} />  
 
     </Routes>
 }

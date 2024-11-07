@@ -11,7 +11,7 @@ import { Link as RouterLink } from "react-router-dom";
 
 function Navbar() {
     const [isscroll, setisscroll] = useState(false);
-    const { isOpen, onOpen, onClose } = useDisclosure(); 
+    const { isOpen, onOpen, onClose } = useDisclosure();
 
     function isScrolling() {
         if (window.scrollY > 80) {
@@ -28,7 +28,7 @@ function Navbar() {
         };
     }, []);
 
-    const [isAuth, setAuth]= useState(false);
+    const [isAuth, setAuth] = useState(false);
 
 
     return (
@@ -36,40 +36,41 @@ function Navbar() {
             <Box h="60px" w="85%" m="auto" display="flex" alignItems="center" justifyContent="space-between">
                 <RouterLink to="/">
                     <img src="/otg.png" alt="pls show D:" style={{ width: '175px', height: '60px' }} />
-                    </RouterLink> 
-                        <Box display="flex" gap="25px" alignItems="center">
-                    <Link display="flex">
-                        <ModeEditOutlineOutlinedIcon />
-                        <Text fontWeight="500" fontSize='md'>Create a Post</Text>
-                    </Link>
-                    <RouterLink to="/planner">
-                    <Link display="flex" alignItems="center" gap="5px">
-                        <MenuBookIcon />
-
-                        <Text fontWeight="500" fontSize='md'>My Planner</Text>
-                </Link>
                 </RouterLink>
-                    
-                <Menu isOpen={isOpen}>
-                    <MenuButton
-                        as={IconButton}
-                        icon={<PersonOutlineOutlinedIcon />}
-                        variant="ghost"
-                        onMouseEnter={onOpen} 
-                        onMouseLeave={onClose} 
-                    />
-                    <MenuList onMouseEnter={onOpen} onMouseLeave={onClose}>
-                        <MenuItem>Account Info</MenuItem>
-                        <MenuItem>Bookmarks</MenuItem>
-                    </MenuList>
-                </Menu> 
-                <Link display="flex">
-                    {isAuth ? 
-                    <Button color="black" onClick={()=>{
-                        setAuth(!isAuth);
-                    }}>Sanghamitra</Button> : <Signin />
-                }
-                </Link> 
+                <Box display="flex" gap="25px" alignItems="center">
+                    <RouterLink to="/create-post">
+                        <Link display="flex">
+                            <ModeEditOutlineOutlinedIcon />
+                            <Text fontWeight="500" fontSize='md'>Create a Post</Text>
+                        </Link>
+                        </RouterLink>
+                        <RouterLink to="/planner">
+                            <Link display="flex" alignItems="center" gap="5px">
+                                <MenuBookIcon />
+                                <Text fontWeight="500" fontSize='md'>My Planner</Text>
+                            </Link>
+                        </RouterLink>
+
+                    <Menu isOpen={isOpen}>
+                        <MenuButton
+                            as={IconButton}
+                            icon={<PersonOutlineOutlinedIcon />}
+                            variant="ghost"
+                            onMouseEnter={onOpen}
+                            onMouseLeave={onClose}
+                        />
+                        <MenuList onMouseEnter={onOpen} onMouseLeave={onClose}>
+                            <MenuItem>Account Info</MenuItem>
+                            <MenuItem>Bookmarks</MenuItem>
+                        </MenuList>
+                    </Menu>
+                    <Link display="flex">
+                        {isAuth ?
+                            <Button color="black" onClick={() => {
+                                setAuth(!isAuth);
+                            }}>Sanghamitra</Button> : <Signin />
+                        }
+                    </Link>
                 </Box>
             </Box>
         </Box>
