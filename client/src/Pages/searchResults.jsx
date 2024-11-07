@@ -4,6 +4,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { initGoogleMapsAPI, getPlaceDetails } from '../google/Google';
 import SearchSuggestions from "../google/SearchSuggestions";
+import Map from "../google/Map";
 
 function SearchResults() {
   const navigate = useNavigate();
@@ -98,7 +99,9 @@ function SearchResults() {
             </Box>
           </a>
         )}
-        <Box p="4" bg="white" boxShadow="md" borderRadius="md" flex="1" ml="4">Coming soon!</Box>
+        <Box p="4" bg="white" boxShadow="md" borderRadius="md" flex="1" ml="4" minHeight="500px">
+          <Map placeDetails={placeDetails} />
+        </Box>
       </Box>
       <Box textAlign="left" mt={6} ml={4}>
         <Heading as="h2" size="lg">
