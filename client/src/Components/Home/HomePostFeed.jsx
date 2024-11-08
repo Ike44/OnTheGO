@@ -1,13 +1,14 @@
 import { Box, Button, Image, Text, VStack, HStack, IconButton, Heading } from '@chakra-ui/react'
 import { ArrowUpIcon, ArrowDownIcon, StarIcon } from '@chakra-ui/icons'
 import React, { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import SubNav from '../Subnav';
 
 
 const HomePostFeed = () => {
   const [posts, setPosts] = useState([])
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -39,6 +40,15 @@ const Post = ({ post }) => {
   const [votes, setVotes] = useState(post.upvotes - post.downvotes)
   const [userVote, setUserVote] = useState(0) // 0: no vote, 1: upvoted, -1: downvoted
   const [isBookmarked, setIsBookmarked] = useState(false)
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Check if the post is already bookmarked on mount
+    const storedBookmarks = localStorage.getItem("bookmarkedPosts");
+    const bookmarks = storedBookmarks ? JSON.parse(storedBookmarks) : [];
+    const isAlreadyBookmarked = bookmarks.some((bookmark) => bookmark._id === post._id);
+    setIsBookmarked(isAlreadyBookmarked);
+  }, [post._id]);
 
   const handleUpvote = () => {
     if (userVote === 1) {
@@ -67,9 +77,22 @@ const Post = ({ post }) => {
   }
 
   const handleBookmark = (e) => {
-    e.stopPropagation()
-    setIsBookmarked(!isBookmarked)
-  }
+    e.stopPropagation();
+    const storedBookmarks = localStorage.getItem("bookmarkedPosts");
+    let bookmarks = storedBookmarks ? JSON.parse(storedBookmarks) : [];
+
+    const isAlreadyBookmarked = bookmarks.some((bookmark) => bookmark._id === post._id);
+
+    if (isAlreadyBookmarked) {
+        bookmarks = bookmarks.filter((bookmark) => bookmark._id !== post._id);
+    } else {
+        bookmarks.push(post);
+    }
+
+    localStorage.setItem("bookmarkedPosts", JSON.stringify(bookmarks));
+    setIsBookmarked(!isAlreadyBookmarked);
+  };
+
 
   return (
     <Box w="100%" p={4} borderWidth="1px" borderRadius="lg" overflow="hidden" _hover={{ bg: 'gray.100' }}>
@@ -112,6 +135,7 @@ const Post = ({ post }) => {
       </VStack>
     </Box>
   )
-}
+  }
 
-export default HomePostFeed
+
+export default HomePostFeed;
