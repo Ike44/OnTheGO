@@ -6,8 +6,8 @@ import ContactUs from '../Pages/contactUs';
 import SearchResults from '../Pages/searchResults';
 import CreatePost from "../Pages/CreatePost";
 import ViewPost from '../Pages/ViewPost';
-
 import Bookmarks from "../Pages/Bookmarks";
+
 
 
 function AllRoutes(){
@@ -18,6 +18,7 @@ function AllRoutes(){
         <Route path="/bookmarks" element={<Bookmarks />} ></Route>
         <Route path="/contactUs" element={<ContactUs />} />
         <Route path="/searchResults" element={<SearchResults />} />
+        
         <Route path="/create-post" element={<CreatePost />} ></Route> 
         <Route path="/view-post/:postId" element={<ViewPost />} />  
 

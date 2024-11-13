@@ -14,6 +14,7 @@ const HomePostFeed = () => {
     const fetchPosts = async () => {
       try {
         const response = await axios.get('http://localhost:3001/api/posts')
+        console.log('Fetched posts:', response.data);
         setPosts(response.data)
       } catch (error) {
         console.error('Error fetching posts:', error)
@@ -119,7 +120,7 @@ const Post = ({ post }) => {
                 <Text fontSize="2xl" fontWeight="bold">{post.title}</Text>
                 <Text noOfLines={5} textAlign="left">{post.body}</Text>
               </VStack>
-              <Image boxSize="250px" src={post.image} alt={post.title} />
+              <Image boxSize="250px" src={post.images[0]} alt={post.title} />
             </HStack>
           </Link>
         </HStack>
