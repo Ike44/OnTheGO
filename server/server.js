@@ -11,6 +11,7 @@ const commentsRoute = require('./routes/commentsRoutes');
 const bookmarkRoutes = require('./routes/bookmarksRoutes');
 const apiRoutes = require('./routes/apiRoutes');
 
+
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -21,8 +22,6 @@ app.use('/api/bookmarks', bookmarkRoutes);
 app.use('/api', apiRoutes);
 
 const mongoURI = process.env.MONGO_URI;
-
-mongoose.set('debug', true);
 
 mongoose.connect(mongoURI, {
 }).then(() => {
