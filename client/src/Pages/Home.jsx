@@ -22,7 +22,7 @@ const Home = () => {
       {/* <Homesix /> */}
       <HomeCountries />
       <HomePostFeed />
-      <Homeseven />
+      {/* <Homeseven /> */}
       <Homeeight />
     </Box>
   )

@@ -8,6 +8,8 @@ import SubNav from '../Subnav';
 
 const HomePostFeed = () => {
   const [posts, setPosts] = useState([])
+  const [currentPage, setCurrentPage] = useState(1);
+  const postsPerPage = 10;
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -22,15 +24,41 @@ const HomePostFeed = () => {
     fetchPosts()
   }, [])
 
+  // Calculate the posts to display on the current page
+  const indexOfLastPost = currentPage * postsPerPage;
+  const indexOfFirstPost = indexOfLastPost - postsPerPage;
+  const currentPosts = posts.slice(indexOfFirstPost, indexOfLastPost);
+
+  const handleNextPage = () => {
+    if (currentPage < Math.ceil(posts.length / postsPerPage)) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const handlePreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
   return (
-    <Box w="85%" m="auto" textAlign="left" mt="40px">
+    <Box w="85%" m="auto" textAlign="left" mt="40px" pb="20px">
       <Heading as="h2" size="xl" mb={-20}>Feed</Heading>
       <SubNav />
       <VStack spacing={8} w="100%" p={0}>
-        {posts.map(post => (
+        {currentPosts.map(post => (
           <Post key={post._id} post={post} />
         ))}
       </VStack>
+      <Box display="flex" justifyContent="space-between" mt={4}>
+        <Button onClick={handlePreviousPage} disabled={currentPage === 1}>
+          Previous
+        </Button>
+        <Text>Page {currentPage} of {Math.ceil(posts.length / postsPerPage)}</Text>
+        <Button onClick={handleNextPage} disabled={currentPage === Math.ceil(posts.length / postsPerPage)}>
+          Next
+        </Button>
+      </Box>
     </Box>
   )
 }
