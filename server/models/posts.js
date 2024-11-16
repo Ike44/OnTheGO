@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 
 const postSchema = new mongoose.Schema({
+  postType: {type: String, required: true },
   title: { type: String, required: true },
   body: { type: String, required: true },
   images: [{ type: String }], 
@@ -9,8 +10,8 @@ const postSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
   category: { type: String, required: true },
   businessWebsite: { type: String },
-  fromDate: { type: Date, required: true},
-  toDate: { type: Date,required: true},
+  fromDate: { type: Date},
+  toDate: { type: Date},
   rating: { type: Number },
   location: {
     description: { type: String, required: true },  
@@ -20,3 +21,4 @@ const postSchema = new mongoose.Schema({
 
 const Post = mongoose.model('posts', postSchema);
 module.exports = Post;
+
