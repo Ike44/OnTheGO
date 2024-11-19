@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import { initGoogleMapsAPI, getPlaceDetails } from '../google/Google';
 import SearchSuggestions from "../google/SearchSuggestions";
 import Map from "../google/Map";
+import axios from 'axios';
 
 function SearchResults() {
   const navigate = useNavigate();
@@ -12,6 +13,8 @@ function SearchResults() {
   const [searchTerm, setSearchTerm] = useState("");
   const [displayedTerm, setDisplayedTerm] = useState("");
   const [placeDetails, setPlaceDetails] = useState(null);
+  const [posts, setPosts] = useState([]);
+  const [filteredPosts, setFilteredPosts] = useState([]);
 
   useEffect(() => {
     const initializeGoogleMaps = async () => {
@@ -40,7 +43,41 @@ function SearchResults() {
         console.error('Error fetching place details:', error);
       });
     }
+
+    const fetchPosts = async () => {
+      try {
+        const response = await axios.get('http://localhost:3001/api/posts');
+        setPosts(response.data);
+      } catch (error) {
+        console.error('Error fetching posts:', error);
+      }
+    };
+
+    fetchPosts();
   }, [location.search]); 
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const query = params.get('q');
+    const placeId = params.get('place_id');
+
+    let filtered = posts;
+
+    if (placeId) {
+      filtered = filtered.filter(post => post.location && post.location.placeId === placeId);
+    }
+
+    if (query) {
+      const lowerCaseQuery = query.toLowerCase();
+      filtered = filtered.filter(post => 
+        post.title.toLowerCase().includes(lowerCaseQuery) || 
+        post.body.toLowerCase().includes(lowerCaseQuery) ||
+        (post.location && post.location.description.toLowerCase().includes(lowerCaseQuery))
+      );
+    }
+
+    setFilteredPosts(filtered);
+  }, [posts, location.search]);
 
   const handleSearch = (query) => {
     const formattedQuery = query.replace(/\s+/g, '+');
@@ -107,6 +144,12 @@ function SearchResults() {
         <Heading as="h2" size="lg">
           Showing results for: {displayedTerm}
         </Heading>
+        {filteredPosts.map((post, index) => (
+          <Box key={index} p={4} bg="white" boxShadow="md" borderRadius="md" mt={4}>
+            <Heading as="h4" size="md">{post.title}</Heading>
+            <Text>{post.body}</Text>
+          </Box>
+        ))}
       </Box>
     </Box>
   );
