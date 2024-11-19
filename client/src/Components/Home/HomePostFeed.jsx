@@ -5,7 +5,6 @@ import { Link, useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import SubNav from '../Subnav';
 
-
 const HomePostFeed = () => {
   const [posts, setPosts] = useState([])
   const [currentPage, setCurrentPage] = useState(1);
@@ -69,6 +68,7 @@ const Post = ({ post }) => {
   const [isBookmarked, setIsBookmarked] = useState(false)
   const navigate = useNavigate();
 
+
   useEffect(() => {
     // Check if the post is already bookmarked on mount
     const storedBookmarks = localStorage.getItem("bookmarkedPosts");
@@ -120,9 +120,12 @@ const Post = ({ post }) => {
     setIsBookmarked(!isAlreadyBookmarked);
   };
 
+  const openPost = () => { 
+    navigate(`/view-post/${post._id}`);
+  };
 
   return (
-    <Box w="100%" p={4} borderWidth="1px" borderRadius="lg" overflow="hidden" _hover={{ bg: 'gray.100' }}>
+    <Box w="100%" p={4} borderWidth="1px" borderRadius="lg" overflow="hidden" _hover={{ bg: 'gray.100' }} onClick={openPost}> 
       <VStack spacing={4} align="start">
         <HStack spacing={4} align="start">
           <VStack spacing={2} align="center">

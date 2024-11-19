@@ -1,41 +1,79 @@
-import { Box, Button, FormControl, FormLabel, Input, Select, Textarea, VStack, Tabs, TabList, TabPanels, Tab, TabPanel, HStack, useToast, List, ListItem } from '@chakra-ui/react';
+import { Box, Button, FormControl, FormLabel, Input, Select, Textarea, VStack, useToast, List, ListItem, HStack } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { FaStar } from 'react-icons/fa';
-import { useState, useRef } from 'react';
-import { getPlaceSuggestions } from '../google/Google';  // Make sure this path is correct
+import { useState, useRef, useEffect } from 'react';
+import { getPlaceSuggestions } from '../google/Google';
+import { useLocation as useRouterLocation } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
+
+
 
 function CreatePost() {
+
+  const [postType, setPostType] = useState('Personal');
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState('');
   const [body, setBody] = useState('');
   const [rating, setRating] = useState(0);
+  const [businessWebsite, setBusinessWebsite] = useState('');
   const [images, setImages] = useState([]);
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
   const [suggestions, setSuggestions] = useState([]);
-  const [isFocused, setIsFocused] = useState(false);
   const [location, setLocation] = useState({
-    description: '', // The full text description of the location
-    placeId: ''      // The place ID from Google Places API, if available
+    description: '',
+    placeId: ''
   });
   const toast = useToast();
   const navigate = useNavigate();
   const inputRef = useRef(null);
-  
 
+  const routerLocation = useRouterLocation();
+  const post = routerLocation.state?.post; 
+  const { postId } = useParams();
+
+
+//added this  
+useEffect(() => {
+  console.log('Editing Post:', post);
+    if (post) {
+      setPostType(post.postType);
+      setTitle(post.title);
+      setCategory(post.category);
+      setBody(post.body);
+      setRating(post.postType === 'Personal' ? post.rating : 0);
+      setBusinessWebsite(post.postType === 'Business' ? post.businessWebsite : '');
+      setFromDate(post.postType === 'Personal' ? post.fromDate : '');
+      setToDate(post.postType === 'Personal' ? post.toDate : '');
+      setLocation(post.location);
+    }
+  }, [post]);
+
+  const deletePost = async () => {
+    try {
+      const response = await axios.delete(`http://localhost:3001/api/posts/${postId}`);
+      if (response.status === 200) {
+        alert('Post deleted successfully');
+        navigate('/');
+      }
+    } catch (error) {
+      console.error('Failed to delete the post:', error);
+      alert('Failed to delete the post');
+    }
+  };
+  
   const handleInputChange = async (event) => {
     const value = event.target.value;
     setLocation(prevState => ({
       ...prevState,
       description: value
     }));
-  
+
     if (value.length > 1) {
       try {
         const results = await getPlaceSuggestions(value);
         setSuggestions(results);
-        setIsFocused(true);
       } catch (error) {
         console.error('Error fetching suggestions:', error);
         setSuggestions([]);
@@ -44,8 +82,6 @@ function CreatePost() {
       setSuggestions([]);
     }
   };
-  
-
 
   const handleSuggestionClick = (suggestion) => {
     setLocation({
@@ -53,10 +89,7 @@ function CreatePost() {
       placeId: suggestion.placeId
     });
     setSuggestions([]);
-    setIsFocused(false);
   };
-  
-
 
   const handleImageChange = (e) => {
     setImages([...e.target.files]);
@@ -74,146 +107,149 @@ function CreatePost() {
     ));
   };
 
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const postData = {
-      title,
-      location: {
-        description: location.description,
-        placeId: location.placeId, 
-      },
-      category,
-      body,
-      rating: rating > 0 ? rating : undefined,
-      images: images.map(file => file.name),
-      fromDate, 
-      toDate, 
+        postType,
+        title,
+        location,
+        category,
+        body,
+        images: images.map(file => file.name),
+        rating: postType === 'Personal' ? rating : undefined,
+        fromDate: postType === 'Personal' ? fromDate : undefined,
+        toDate: postType === 'Personal' ? toDate : undefined,
+        businessWebsite: postType === 'Business' ? businessWebsite : undefined
     };
-  
-    console.log("Submitting post with data:", postData); // Ensure this logs correct values
-  
+
+    const url = postId ? `http://localhost:3001/api/posts/${postId}` : 'http://localhost:3001/api/posts';
+    const method = postId ? 'put' : 'post';
+    
+
     try {
-      const response = await axios.post('http://localhost:3001/api/posts', postData);
-      console.log("Server response:", response); // Check what the server actually returns
-      toast({
-        title: 'Post Created.',
-        description: "We've created your post successfully.",
-        status: 'success',
-        duration: 5000,
-        isClosable: true,
-      });
-      navigate(`/view-post/${response.data._id}`);
+        const response = await axios[method](url, postData);
+        toast({
+            title: post ? 'Post Updated.' : 'Post Created.',
+            description: post ? "We've updated your post successfully." : "We've created your post successfully.",
+            status: 'success',
+            duration: 5000,
+            isClosable: true,
+        });
+        navigate(`/view-post/${response.data._id}`);
     } catch (error) {
-      console.error('Error creating post:', error);
-      toast({
-        title: 'Error Creating Post.',
-        description: error.message,
-        status: 'error',
-        duration: 5000,
-        isClosable: true,
-      });
+        console.error('Error saving post:', error);
+        toast({
+            title: 'Error Saving Post.',
+            description: error.message,
+            status: 'error',
+            duration: 5000,
+            isClosable: true,
+        });
     }
   };
-  
-  
+
 
   return (
-    <Box p={4}>
-      <Tabs variant="enclosed">
-        <TabList>
-          <Tab>Personal</Tab>
-        </TabList>
-        <TabPanels>
-          <TabPanel>
-            <form onSubmit={handleSubmit}>
-              <VStack spacing={4} align="stretch">
-                <FormControl isRequired>
-                  <FormLabel>Post Title</FormLabel>
-                  <Input type="text" value={title} onChange={(e) => setTitle(e.target.value)} />
-                </FormControl>
-                <FormControl isRequired>
-                  <FormLabel>Place</FormLabel>
-                  <Input
-                    ref={inputRef}
-                    type="text"
-                    value={location.description}
-                    onChange={handleInputChange}
-                    onBlur={() => setIsFocused(false)}
-                  />
-                  {isFocused && suggestions.length > 0 && (
-                    <List spacing={3} mt={2} bg="white" p={4} rounded="md" boxShadow="md" zIndex="2">
-                      {suggestions.map((suggestion, index) => (
-                        <ListItem
-                          key={index}
-                          textAlign="left"
-                          px={2}
-                          py={2}
-                          _hover={{
-                            bg: "gray.500",
-                            color: "white",
-                            cursor: "pointer"
-                          }}
-                          transition="all 0.2s"
-                          onMouseDown={() => handleSuggestionClick(suggestion)}
-                        >
-                          {suggestion.description}
-                        </ListItem>
-                      ))}
-                    </List>
-                  )}
-                </FormControl>
-                <FormControl isRequired>
-                  <FormLabel>Category</FormLabel>
-                  <Select placeholder="Select category" value={category} onChange={(e) => setCategory(e.target.value)}>
-                    <option value="restaurant">Restaurant</option>
-                    <option value="hidden gems">Hidden Gems</option>
-                    <option value="city">City</option>
-                    <option value="transportation">Transportation</option>
-                  </Select>
-                </FormControl>
-                <FormControl isRequired>
-                  <FormLabel>Duration</FormLabel>
-                  <HStack spacing={4} align="center">
-                    <Box textAlign="center">
-                      <Input
-                        type="date"
-                        value={fromDate}
-                        onChange={(e) => setFromDate(e.target.value)}
-                      />
-                      <FormLabel fontSize="sm" mt={1}>From</FormLabel>
-                    </Box>
-                    <Box textAlign="center">
-                      <Input
-                        type="date"
-                        value={toDate}
-                        onChange={(e) => setToDate(e.target.value)}
-                      />
-                      <FormLabel fontSize="sm" mt={1}>To</FormLabel>
-                    </Box>
-                  </HStack>
-                </FormControl>
-                <FormControl isRequired>
-                  <FormLabel>Description</FormLabel>
-                  <Textarea value={body} onChange={(e) => setBody(e.target.value)} />
-                </FormControl>
-                <FormControl isRequired>
-                  <FormLabel>Rating</FormLabel>
-                  <HStack spacing={1}>
-                    {renderStars()}
-                  </HStack>
-                </FormControl>
-                <FormControl>
-                  <FormLabel>Upload Images</FormLabel>
-                  <Input type="file" multiple onChange={handleImageChange} />
-                </FormControl>
-                <Button type="submit" colorScheme="blue">Post</Button>
-              </VStack>
-            </form>
-          </TabPanel>
-        </TabPanels>
-      </Tabs>
+    <Box w="85%" m="auto" pt="15px" textAlign="left" mt="6" position="relative">
+      <form onSubmit={handleSubmit}>
+        <VStack spacing={4} align="stretch">
+          <FormControl isRequired mt="20">
+            <FormLabel>Post Type</FormLabel>
+            <Select value={postType} onChange={(e) => setPostType(e.target.value)}>
+              <option value="Personal">Personal</option>
+              <option value="Business">Business</option>
+            </Select>
+          </FormControl>
+          
+          <FormControl isRequired>
+            <FormLabel>Post Title</FormLabel>
+            <Input type="text" value={title} onChange={(e) => setTitle(e.target.value)} />
+          </FormControl>
+
+          <FormControl isRequired>
+            <FormLabel>Location</FormLabel>
+            <Input
+              ref={inputRef}
+              type="text"
+              value={location.description}
+              onChange={handleInputChange}
+            />
+            {suggestions.length > 0 && (
+              <List spacing={3} mt={2} bg="white" p={4} rounded="md" boxShadow="md" zIndex="2">
+                {suggestions.map((suggestion, index) => (
+                  <ListItem
+                    key={index}
+                    textAlign="left"
+                    px={2}
+                    py={2}
+                    _hover={{
+                      bg: "gray.500",
+                      color: "white",
+                      cursor: "pointer"
+                    }}
+                    onMouseDown={() => handleSuggestionClick(suggestion)}
+                  >
+                    {suggestion.description}
+                  </ListItem>
+                ))}
+              </List>
+            )}
+          </FormControl>
+
+          <FormControl isRequired>
+            <FormLabel>Category</FormLabel>
+            <Select placeholder="Select category" value={category} onChange={(e) => setCategory(e.target.value)}>
+              <option value="Restaurant">Restaurant</option>
+              <option value="Hidden gems">Hidden Gems</option>
+              <option value="City">City</option>
+              <option value="Transportation">Transportation</option>
+            </Select>
+          </FormControl>
+
+          {postType === 'Personal' && (
+            <>
+              <FormControl>
+                <FormLabel>Duration</FormLabel>
+                <HStack spacing={4}>
+                  <Input type="date" value={fromDate} onChange={(e) => setFromDate(e.target.value)} />
+                  <Input type="date" value={toDate} onChange={(e) => setToDate(e.target.value)} />
+                </HStack>
+              </FormControl>
+              <FormControl>
+                <FormLabel>Rating</FormLabel>
+                <HStack spacing={1}>
+                  {renderStars()}
+                </HStack>
+              </FormControl>
+            </>
+          )}
+
+          {postType === 'Business' && (
+            <FormControl>
+              <FormLabel>Business Website</FormLabel>
+              <Input type="text" value={businessWebsite} onChange={(e) => setBusinessWebsite(e.target.value)} />
+            </FormControl>
+          )}
+
+          <FormControl>
+            <FormLabel>Description</FormLabel>
+            <Textarea value={body} onChange={(e) => setBody(e.target.value)} />
+          </FormControl>
+
+          <FormControl>
+            <FormLabel>Upload Images</FormLabel>
+            <Input type="file" multiple onChange={handleImageChange} />
+          </FormControl>
+
+          <Button type="submit" colorScheme="blue" mb="40">Post</Button>
+        </VStack>
+      </form>
     </Box>
   );
 }
 
 export default CreatePost;
+
+
+
