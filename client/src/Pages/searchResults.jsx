@@ -1,10 +1,11 @@
 import { SearchIcon } from "@chakra-ui/icons";
-import { Box, Heading, Text, Link, VStack, HStack, Icon } from "@chakra-ui/react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { Box, Heading, Text, Link as ChakraLink, VStack, HStack, Icon } from "@chakra-ui/react";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { initGoogleMapsAPI, getPlaceDetails } from '../google/Google';
 import SearchSuggestions from "../google/SearchSuggestions";
 import Map from "../google/Map";
+import axios from 'axios';
 
 function SearchResults() {
   const navigate = useNavigate();
@@ -12,6 +13,8 @@ function SearchResults() {
   const [searchTerm, setSearchTerm] = useState("");
   const [displayedTerm, setDisplayedTerm] = useState("");
   const [placeDetails, setPlaceDetails] = useState(null);
+  const [posts, setPosts] = useState([]);
+  const [filteredPosts, setFilteredPosts] = useState([]);
 
   useEffect(() => {
     const initializeGoogleMaps = async () => {
@@ -40,7 +43,41 @@ function SearchResults() {
         console.error('Error fetching place details:', error);
       });
     }
+
+    const fetchPosts = async () => {
+      try {
+        const response = await axios.get('http://localhost:3001/api/posts');
+        setPosts(response.data);
+      } catch (error) {
+        console.error('Error fetching posts:', error);
+      }
+    };
+
+    fetchPosts();
   }, [location.search]); 
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const query = params.get('q');
+    const placeId = params.get('place_id');
+
+    let filtered = posts;
+
+    if (placeId) {
+      filtered = filtered.filter(post => post.location && post.location.place_id === placeId);
+    }
+
+    if (query) {
+      const lowerCaseQuery = query.toLowerCase();
+      filtered = filtered.filter(post => 
+        post.title.toLowerCase().includes(lowerCaseQuery) || 
+        post.body.toLowerCase().includes(lowerCaseQuery) ||
+        (post.location && post.location.description.toLowerCase().includes(lowerCaseQuery))
+      );
+    }
+
+    setFilteredPosts(filtered);
+  }, [posts, location.search]);
 
   const handleSearch = (query) => {
     const formattedQuery = query.replace(/\s+/g, '+');
@@ -69,9 +106,9 @@ function SearchResults() {
                 {placeDetails.website && (
                   <HStack onClick={(e) => e.stopPropagation()}>
                     <Icon as={SearchIcon} />
-                    <Link href={placeDetails.website} isExternal color="blue.500">
+                    <ChakraLink href={placeDetails.website} isExternal color="blue.500">
                       {placeDetails.website.length > 30 ? `${placeDetails.website.substring(0, 30)}...` : placeDetails.website}
-                    </Link>
+                    </ChakraLink>
                   </HStack>
                 )}
                 {placeDetails.opening_hours && placeDetails.opening_hours.weekday_text && (
@@ -107,6 +144,14 @@ function SearchResults() {
         <Heading as="h2" size="lg">
           Showing results for: {displayedTerm}
         </Heading>
+        {filteredPosts.map((post, index) => (
+          <Link to={`/view-post/${post._id}`} key={index}>
+            <Box p={4} bg="white" boxShadow="md" borderRadius="md" mt={4}>
+              <Heading as="h4" size="md">{post.title}</Heading>
+              <Text>{post.body}</Text>
+            </Box>
+          </Link>
+        ))}
       </Box>
     </Box>
   );

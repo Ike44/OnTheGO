@@ -20,10 +20,8 @@ function CreatePost() {
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
   const [suggestions, setSuggestions] = useState([]);
-  const [location, setLocation] = useState({
-    description: '',
-    placeId: ''
-  });
+  const [locationDescription, setLocationDescription] = useState('');
+  const [locationPlaceId, setLocationPlaceId] = useState('');
   const toast = useToast();
   const navigate = useNavigate();
   const inputRef = useRef(null);
@@ -41,16 +39,15 @@ function CreatePost() {
       setBusinessWebsite(post.postType === 'Business' ? post.businessWebsite : '');
       setFromDate(post.postType === 'Personal' ? post.fromDate : '');
       setToDate(post.postType === 'Personal' ? post.toDate : '');
-      setLocation(post.location);
+      setLocationDescription(post.location.description);
+      setLocationPlaceId(post.location.placeId);
     }
   }, [post]);
 
   const handleInputChange = async (event) => {
     const value = event.target.value;
-    setLocation(prevState => ({
-      ...prevState,
-      description: value
-    }));
+    setLocationDescription(value);
+    setLocationPlaceId('');
     if (value.length > 1) {
       try {
         const results = await getPlaceSuggestions(value);
@@ -65,10 +62,8 @@ function CreatePost() {
   };
 
   const handleSuggestionClick = (suggestion) => {
-    setLocation({
-      description: suggestion.description,
-      placeId: suggestion.placeId
-    });
+    setLocationDescription(suggestion.description);
+    setLocationPlaceId(suggestion.place_id);
     setSuggestions([]);
   };
 
@@ -94,7 +89,7 @@ function CreatePost() {
           setUploadProgress(progress);
         }
       });
-      return response.data.file._id; // Return the uploaded image ID
+      return response.data.file.location; // Return the uploaded image URL
     } catch (error) {
       console.error('Error uploading image:', error);
       throw new Error('Image upload failed');
@@ -105,23 +100,26 @@ function CreatePost() {
     e.preventDefault();
 
     try {
-      let imageId = '';
+      let imageUrl = '';
       if (image) {
-        imageId = await uploadImage();
+        imageUrl = await uploadImage();
       }
 
       const postData = {
         postType,
         title,
-        location,
+        location: {
+          description: locationDescription,
+          place_id: locationPlaceId
+        },
         category,
         body,
-        image: imageId,
+        image: imageUrl,
         rating: postType === 'Personal' ? rating : undefined,
         fromDate: postType === 'Personal' ? fromDate : undefined,
         toDate: postType === 'Personal' ? toDate : undefined,
         businessWebsite: postType === 'Business' ? businessWebsite : undefined
-      };
+    };
 
       const url = postId ? `http://localhost:3001/api/posts/${postId}` : 'http://localhost:3001/api/posts';
       const method = postId ? 'put' : 'post';
@@ -181,7 +179,7 @@ function CreatePost() {
             <Input
               ref={inputRef}
               type="text"
-              value={location.description}
+              value={locationDescription}
               onChange={handleInputChange}
             />
             {suggestions.length > 0 && (
