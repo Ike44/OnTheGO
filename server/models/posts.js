@@ -15,7 +15,7 @@ const postSchema = new mongoose.Schema({
   rating: { type: Number },
   location: {
     description: { type: String, required: true },  
-    placeId: { type: String, required: false }      
+    place_id: { type: String, required: true }      
   }
 });
 

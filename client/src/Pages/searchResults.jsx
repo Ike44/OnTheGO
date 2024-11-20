@@ -1,6 +1,6 @@
 import { SearchIcon } from "@chakra-ui/icons";
-import { Box, Heading, Text, Link, VStack, HStack, Icon } from "@chakra-ui/react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { Box, Heading, Text, Link as ChakraLink, VStack, HStack, Icon } from "@chakra-ui/react";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { initGoogleMapsAPI, getPlaceDetails } from '../google/Google';
 import SearchSuggestions from "../google/SearchSuggestions";
@@ -64,7 +64,7 @@ function SearchResults() {
     let filtered = posts;
 
     if (placeId) {
-      filtered = filtered.filter(post => post.location && post.location.placeId === placeId);
+      filtered = filtered.filter(post => post.location && post.location.place_id === placeId);
     }
 
     if (query) {
@@ -106,9 +106,9 @@ function SearchResults() {
                 {placeDetails.website && (
                   <HStack onClick={(e) => e.stopPropagation()}>
                     <Icon as={SearchIcon} />
-                    <Link href={placeDetails.website} isExternal color="blue.500">
+                    <ChakraLink href={placeDetails.website} isExternal color="blue.500">
                       {placeDetails.website.length > 30 ? `${placeDetails.website.substring(0, 30)}...` : placeDetails.website}
-                    </Link>
+                    </ChakraLink>
                   </HStack>
                 )}
                 {placeDetails.opening_hours && placeDetails.opening_hours.weekday_text && (
@@ -145,10 +145,12 @@ function SearchResults() {
           Showing results for: {displayedTerm}
         </Heading>
         {filteredPosts.map((post, index) => (
-          <Box key={index} p={4} bg="white" boxShadow="md" borderRadius="md" mt={4}>
-            <Heading as="h4" size="md">{post.title}</Heading>
-            <Text>{post.body}</Text>
-          </Box>
+          <Link to={`/view-post/${post._id}`} key={index}>
+            <Box p={4} bg="white" boxShadow="md" borderRadius="md" mt={4}>
+              <Heading as="h4" size="md">{post.title}</Heading>
+              <Text>{post.body}</Text>
+            </Box>
+          </Link>
         ))}
       </Box>
     </Box>
