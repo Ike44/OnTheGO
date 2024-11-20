@@ -1,4 +1,4 @@
-import { Box, Button, FormControl, FormLabel, Input, Select, Textarea, VStack, useToast, List, ListItem, HStack } from '@chakra-ui/react';
+import { Box, Button, FormControl, FormLabel, Input, Select, Textarea, VStack, useToast, List, ListItem, HStack, Image } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { FaStar } from 'react-icons/fa';
@@ -7,36 +7,29 @@ import { getPlaceSuggestions } from '../google/Google';
 import { useLocation as useRouterLocation } from 'react-router-dom';
 import { useParams } from 'react-router-dom';
 
-
-
 function CreatePost() {
-
   const [postType, setPostType] = useState('Personal');
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState('');
   const [body, setBody] = useState('');
   const [rating, setRating] = useState(0);
   const [businessWebsite, setBusinessWebsite] = useState('');
-  const [images, setImages] = useState([]);
+  const [image, setImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
   const [suggestions, setSuggestions] = useState([]);
-  const [location, setLocation] = useState({
-    description: '',
-    placeId: ''
-  });
+  const [locationDescription, setLocationDescription] = useState('');
+  const [locationPlaceId, setLocationPlaceId] = useState('');
   const toast = useToast();
   const navigate = useNavigate();
   const inputRef = useRef(null);
-
   const routerLocation = useRouterLocation();
-  const post = routerLocation.state?.post; 
+  const post = routerLocation.state?.post;
   const { postId } = useParams();
 
-
-//added this  
-useEffect(() => {
-  console.log('Editing Post:', post);
+  useEffect(() => {
     if (post) {
       setPostType(post.postType);
       setTitle(post.title);
@@ -46,30 +39,15 @@ useEffect(() => {
       setBusinessWebsite(post.postType === 'Business' ? post.businessWebsite : '');
       setFromDate(post.postType === 'Personal' ? post.fromDate : '');
       setToDate(post.postType === 'Personal' ? post.toDate : '');
-      setLocation(post.location);
+      setLocationDescription(post.location.description);
+      setLocationPlaceId(post.location.placeId);
     }
   }, [post]);
 
-  const deletePost = async () => {
-    try {
-      const response = await axios.delete(`http://localhost:3001/api/posts/${postId}`);
-      if (response.status === 200) {
-        alert('Post deleted successfully');
-        navigate('/');
-      }
-    } catch (error) {
-      console.error('Failed to delete the post:', error);
-      alert('Failed to delete the post');
-    }
-  };
-  
   const handleInputChange = async (event) => {
     const value = event.target.value;
-    setLocation(prevState => ({
-      ...prevState,
-      description: value
-    }));
-
+    setLocationDescription(value);
+    setLocationPlaceId('');
     if (value.length > 1) {
       try {
         const results = await getPlaceSuggestions(value);
@@ -84,15 +62,88 @@ useEffect(() => {
   };
 
   const handleSuggestionClick = (suggestion) => {
-    setLocation({
-      description: suggestion.description,
-      placeId: suggestion.placeId
-    });
+    setLocationDescription(suggestion.description);
+    setLocationPlaceId(suggestion.place_id);
     setSuggestions([]);
   };
 
   const handleImageChange = (e) => {
-    setImages([...e.target.files]);
+    const file = e.target.files[0];
+    setImage(file);
+    // Generate preview
+    const reader = new FileReader();
+    reader.onloadend = () => setImagePreview(reader.result);
+    reader.readAsDataURL(file);
+  };
+
+  const uploadImage = async () => {
+    const formData = new FormData();
+    formData.append('image', image);
+    try {
+      const response = await axios.post('http://localhost:3001/images/upload', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        },
+        onUploadProgress: (progressEvent) => {
+          const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+          setUploadProgress(progress);
+        }
+      });
+      return response.data.file.location; // Return the uploaded image URL
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      throw new Error('Image upload failed');
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      let imageUrl = '';
+      if (image) {
+        imageUrl = await uploadImage();
+      }
+
+      const postData = {
+        postType,
+        title,
+        location: {
+          description: locationDescription,
+          place_id: locationPlaceId
+        },
+        category,
+        body,
+        image: imageUrl,
+        rating: postType === 'Personal' ? rating : undefined,
+        fromDate: postType === 'Personal' ? fromDate : undefined,
+        toDate: postType === 'Personal' ? toDate : undefined,
+        businessWebsite: postType === 'Business' ? businessWebsite : undefined
+      };
+      console.log('Post data:', postData);
+
+      const url = postId ? `http://localhost:3001/api/posts/${postId}` : 'http://localhost:3001/api/posts';
+      const method = postId ? 'put' : 'post';
+      
+      const response = await axios[method](url, postData);
+      toast({
+        title: post ? 'Post Updated.' : 'Post Created.',
+        description: post ? "We've updated your post successfully." : "We've created your post successfully.",
+        status: 'success',
+        duration: 5000,
+        isClosable: true,
+      });
+      navigate(`/view-post/${response.data._id}`);
+    } catch (error) {
+      console.error('Error saving post:', error);
+      toast({
+        title: 'Error Saving Post.',
+        description: error.message,
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
+    }
   };
 
   const renderStars = () => {
@@ -106,49 +157,6 @@ useEffect(() => {
       />
     ));
   };
-
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const postData = {
-        postType,
-        title,
-        location,
-        category,
-        body,
-        images: images.map(file => file.name),
-        rating: postType === 'Personal' ? rating : undefined,
-        fromDate: postType === 'Personal' ? fromDate : undefined,
-        toDate: postType === 'Personal' ? toDate : undefined,
-        businessWebsite: postType === 'Business' ? businessWebsite : undefined
-    };
-
-    const url = postId ? `http://localhost:3001/api/posts/${postId}` : 'http://localhost:3001/api/posts';
-    const method = postId ? 'put' : 'post';
-    
-
-    try {
-        const response = await axios[method](url, postData);
-        toast({
-            title: post ? 'Post Updated.' : 'Post Created.',
-            description: post ? "We've updated your post successfully." : "We've created your post successfully.",
-            status: 'success',
-            duration: 5000,
-            isClosable: true,
-        });
-        navigate(`/view-post/${response.data._id}`);
-    } catch (error) {
-        console.error('Error saving post:', error);
-        toast({
-            title: 'Error Saving Post.',
-            description: error.message,
-            status: 'error',
-            duration: 5000,
-            isClosable: true,
-        });
-    }
-  };
-
 
   return (
     <Box w="85%" m="auto" pt="15px" textAlign="left" mt="6" position="relative">
@@ -172,7 +180,7 @@ useEffect(() => {
             <Input
               ref={inputRef}
               type="text"
-              value={location.description}
+              value={locationDescription}
               onChange={handleInputChange}
             />
             {suggestions.length > 0 && (
@@ -238,8 +246,25 @@ useEffect(() => {
           </FormControl>
 
           <FormControl>
-            <FormLabel>Upload Images</FormLabel>
-            <Input type="file" multiple onChange={handleImageChange} />
+            <FormLabel>Upload Image</FormLabel>
+            <Input type="file" onChange={handleImageChange} />
+            {uploadProgress > 0 && uploadProgress < 100 && (
+              <Box w="100%" h="2" bg="gray.200" rounded="full" mb={4}>
+                <Box w={`${uploadProgress}%`} h="100%" bg="blue.500" rounded="full"/>
+              </Box>
+            )}
+            {imagePreview && (
+              <Box maxW="300px" mt={4}>
+                <Image
+                  src={imagePreview}
+                  alt="Preview"
+                  objectFit="cover"
+                  w="100%"
+                  h="100px"
+                  rounded="md"
+                />
+              </Box>
+            )}
           </FormControl>
 
           <Button type="submit" colorScheme="blue" mb="40">Post</Button>
