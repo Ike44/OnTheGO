@@ -10,14 +10,20 @@ import axios from 'axios';
 function ViewPost() {
   const { postId } = useParams();
   const [post, setPost] = useState(null);
+  const [imageUrl, setImageUrl] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchPost = async () => {
       try {
         const response = await axios.get(`http://localhost:3001/api/posts/${postId}`);
-        console.log(response.data);
-        setPost(response.data);
+        const postData = response.data;
+        setPost(postData);
+
+        if (postData.image) {
+          const imageResponse = await axios.get(`http://localhost:3001/images/${postData.image}`);
+          setImageUrl(imageResponse.data.url);
+        }
       } catch (error) {
         console.error("Error fetching post:", error);
       }
@@ -25,26 +31,22 @@ function ViewPost() {
     fetchPost();
   }, [postId]);
 
-
-  // Updated deletePost function in ViewPost.jsx
-const deletePost = async () => {
-  try {
-    const response = await axios.delete(`http://localhost:3001/api/posts/${post._id}`);
-    if (response.status === 200) {
-      alert('Post deleted successfully');
-      navigate('/'); // Redirect to the list of posts or a suitable route
+  const deletePost = async () => {
+    try {
+      const response = await axios.delete(`http://localhost:3001/api/posts/${post._id}`);
+      if (response.status === 200) {
+        alert('Post deleted successfully');
+        navigate('/'); // Redirect to the list of posts or a suitable route
+      }
+    } catch (error) {
+      console.error('Failed to delete the post:', error);
+      alert('Failed to delete the post');
     }
-  } catch (error) {
-    console.error('Failed to delete the post:', error);
-    alert('Failed to delete the post');
-  }
-};
-
+  };
 
   const editPost = () => {
     navigate(`/edit-post/${postId}`, { state: { post } });
   };
-  
 
   if (!post) {
     return <Center>Loading...</Center>;
@@ -95,7 +97,7 @@ const deletePost = async () => {
           <Image
             mt={5}
             borderRadius="md"
-            src={post.imageUrl || "https://via.placeholder.com/500x300"}
+            src={imageUrl || "https://via.placeholder.com/500x300"}
             alt="Post Image"
             objectFit="cover"
             w="full"
