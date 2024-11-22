@@ -6,6 +6,7 @@ import { useState, useRef, useEffect } from 'react';
 import { getPlaceSuggestions } from '../google/Google';
 import { useLocation as useRouterLocation } from 'react-router-dom';
 import { useParams } from 'react-router-dom';
+import ChatBot from '../ChatBot/ChatBot'
 
 function CreatePost() {
   const [postType, setPostType] = useState('Personal');
@@ -272,6 +273,7 @@ function CreatePost() {
           <Button type="submit" colorScheme="blue" mb="40">Post</Button>
         </VStack>
       </form>
+      <ChatBot />
     </Box>
   );
 }

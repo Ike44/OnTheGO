@@ -2,6 +2,7 @@ import React from 'react'
 import { Box, Link, Icon, Text } from '@chakra-ui/react'
 import { RiHome2Fill } from 'react-icons/ri';
 import { ChevronRightIcon } from '@chakra-ui/icons';
+import ChatBot from '../ChatBot/ChatBot'
 
 const Hotel = () => {
 
@@ -385,6 +386,7 @@ const Hotel = () => {
             <Box></Box>
             <Box></Box>
         </Box>
+        <ChatBot />
     </Box>
   )
 }
