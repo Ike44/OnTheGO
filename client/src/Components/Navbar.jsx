@@ -32,8 +32,8 @@ function Navbar() {
 
 
     return (
-        <Box w="full" boxShadow={isscroll ? 'md' : "sm"} position="fixed" bg="#FFFFFF" zIndex={1} p="3px 0px">
-            <Box h="60px" w="85%" m="auto" display="flex" alignItems="center" justifyContent="space-between">
+        <Box w="full" boxShadow={isscroll ? 'md' : "sm"} position="fixed" bg="#FFFFFF" zIndex={1000} p="3px 0px" height="66px">
+                <Box h="60px" w="85%" m="auto" display="flex" alignItems="center" justifyContent="space-between">
                 <RouterLink to="/">
                     <img src="/otg.png" alt="pls show D:" style={{ width: '175px', height: '60px' }} />
                 </RouterLink>

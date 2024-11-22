@@ -1,10 +1,11 @@
 import { Box, Text, Link, Icon } from "@chakra-ui/react";
 import { FaInstagram, FaFacebook, FaTwitter } from "react-icons/fa";
 
+const Footer = () => {
 
-function Footer() {
   return (
     <Box textAlign="center" bg="#FFFFFF" p="30px 0px">
+
       <Box w="85%" m="auto">
         <Text fontSize="md" mb="10px">
           Connect with us!
@@ -14,21 +15,20 @@ function Footer() {
             <Icon as={FaInstagram} boxSize={6} />
           </Link>
           <Link href="https://facebook.com" isExternal>
-            <Icon as={FaFacebook} boxSize={6} />
+            <Icon as={FaFacebook} boxSize={6}  />
           </Link>
           <Link href="https://twitter.com" isExternal>
             <Icon as={FaTwitter} boxSize={6} />
           </Link>
         </Box>
         <Box mt="20px">
-          <Link href="/contactUs" fontSize="lg" color="black.500">
+          <Link href="/contactUs" fontSize="lg" >
             Contact Us
           </Link>
         </Box>
-
       </Box>
     </Box>
   );
-}
 
+}
 export default Footer;

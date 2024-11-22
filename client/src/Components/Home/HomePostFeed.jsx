@@ -4,35 +4,76 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import SubNav from '../Subnav';
+import { useLocation } from 'react-router-dom';
 
 const HomePostFeed = () => {
   const [posts, setPosts] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const postsPerPage = 10;
+  const [loading, setLoading] = useState(false)
+  const [noPostsMessage, setNoPostsMessage] = useState("")
+  const location = useLocation();
+  const presetLocation = location.state?.presetLocation;
+  const selectedCountry = presetLocation || '';
 
   useEffect(() => {
     const fetchPosts = async () => {
+      setLoading(true);
       try {
-        const response = await axios.get('http://localhost:3001/api/posts');
-        const postsData = response.data;
-
-        // Fetch image URLs for each post
-        const postsWithImages = await Promise.all(postsData.map(async (post) => {
-          if (post.image) {
-            const imageResponse = await axios.get(`http://localhost:3001/images/${post.image}`);
-            post.imageUrl = imageResponse.data.url;
+        if (presetLocation) {
+          // Simulate "Apply" button click for presetLocation
+          const filters = { selectedCountry: presetLocation };
+          const response = await axios.post('http://localhost:3001/api/filters', filters);
+  
+          if (response.data.message) {
+            setNoPostsMessage(response.data.message);
+            setPosts([]);
+          } else {
+            const postsData = response.data.posts;
+  
+            // Fetch image URLs for each post
+            const postsWithImages = await Promise.all(
+              postsData.map(async (post) => {
+                if (post.image) {
+                  const imageResponse = await axios.get(`http://localhost:3001/images/${post.image}`);
+                  post.imageUrl = imageResponse.data.url;
+                }
+                return post;
+              })
+            );
+  
+            setPosts(postsWithImages);
+            setNoPostsMessage('');
           }
-          return post;
-        }));
-
-        setPosts(postsWithImages);
+        } else {
+          // Fetch all posts if no presetLocation is set
+          const response = await axios.get('http://localhost:3001/api/posts');
+          const postsData = response.data;
+  
+          // Fetch image URLs for each post
+          const postsWithImages = await Promise.all(
+            postsData.map(async (post) => {
+              if (post.image) {
+                const imageResponse = await axios.get(`http://localhost:3001/images/${post.image}`);
+                post.imageUrl = imageResponse.data.url;
+              }
+              return post;
+            })
+          );
+  
+          setPosts(postsWithImages);
+        }
       } catch (error) {
-        console.error('Error fetching posts:', error);
+        console.error('Error fetching posts:', error.response || error);
+        setNoPostsMessage(`Error fetching posts: ${error.response?.data?.error || error.message}`);
+      } finally {
+        setLoading(false);
       }
     };
-
+  
     fetchPosts();
-  }, []);
+  }, [presetLocation]);
+  
 
   // Calculate the posts to display on the current page
   const indexOfLastPost = currentPage * postsPerPage;
@@ -51,24 +92,56 @@ const HomePostFeed = () => {
     }
   };
 
+
+  const fetchFilteredPosts = async (filters) => {
+    setLoading(true)
+    try {
+      const response = await axios.post('http://localhost:3001/api/filters', filters)
+      if (response.data.message) {
+        setNoPostsMessage(response.data.message)
+        setPosts([])
+      } else {
+        setPosts(response.data.posts)
+        setNoPostsMessage("")
+      }
+    } catch (error) {
+      console.error('Error fetching filtered posts:', error.response || error);
+      setNoPostsMessage(`Error fetching filtered posts: ${error.response?.data?.error || error.message}`)
+   } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleApplyFilters = (filters) => {
+    fetchFilteredPosts(filters)
+  }
+
+
   return (
-    <Box w="85%" m="auto" textAlign="left" mt="40px" pb="20px">
+    <Box w="85%" m="auto" textAlign="left" mt="40px" mb="40px">
       <Heading as="h2" size="xl" mb={-20}>Feed</Heading>
-      <SubNav />
-      <VStack spacing={8} w="100%" p={0}>
-        {currentPosts.map(post => (
-          <Post key={post._id} post={post} />
-        ))}
-      </VStack>
-      <Box display="flex" justifyContent="space-between" mt={4}>
-        <Button onClick={handlePreviousPage} disabled={currentPage === 1}>
-          Previous
-        </Button>
-        <Text>Page {currentPage} of {Math.ceil(posts.length / postsPerPage)}</Text>
-        <Button onClick={handleNextPage} disabled={currentPage === Math.ceil(posts.length / postsPerPage)}>
-          Next
-        </Button>
-      </Box>
+      <SubNav onApplyFilters={handleApplyFilters} hcFilter={selectedCountry} />
+      {loading ? (
+        <Text mt={8}>Loading...</Text>
+      ) : (
+        <>
+          {noPostsMessage && <Text mt={8} color="red.500">{noPostsMessage}</Text>}
+          <VStack spacing={8} w="100%" p={0}>
+            {currentPosts.map(post => (
+              <Post key={post._id} post={post} />
+            ))}
+          </VStack>
+          <Box display="flex" justifyContent="space-between" mt={4}>
+            <Button onClick={handlePreviousPage} disabled={currentPage === 1}>
+              Previous
+            </Button>
+            <Text>Page {currentPage} of {Math.ceil(posts.length / postsPerPage)}</Text>
+            <Button onClick={handleNextPage} disabled={currentPage === Math.ceil(posts.length / postsPerPage)}>
+              Next
+            </Button>
+          </Box>
+        </>
+      )}
     </Box>
   );
 };

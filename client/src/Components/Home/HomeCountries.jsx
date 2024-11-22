@@ -1,9 +1,14 @@
-import React, { useRef } from "react";
-import { Box, Image, Text, IconButton, Link } from "@chakra-ui/react";
+import React, { useRef, useState, useEffect } from "react";
+import { Box, Image, Text, IconButton } from "@chakra-ui/react";
 import { ChevronLeftIcon, ChevronRightIcon } from "@chakra-ui/icons";
+import { useNavigate } from "react-router-dom";
 
 function HomeCountries() {
     const scrollRef = useRef(null);
+    const [canScrollLeft, setCanScrollLeft] = useState(false);
+    const [canScrollRight, setCanScrollRight] = useState(true);
+    const navigate = useNavigate();
+
 
     const data = [
         {
@@ -54,27 +59,56 @@ function HomeCountries() {
         }
     };
 
+    const updateScrollButtons = () => {
+        if (scrollRef.current) {
+            const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
+            setCanScrollLeft(scrollLeft > 0);
+            setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 1);
+        }
+    };
+
+    useEffect(() => {
+        updateScrollButtons();
+        const refCurrent = scrollRef.current;
+        if (refCurrent) {
+            refCurrent.addEventListener("scroll", updateScrollButtons);
+            return () => refCurrent.removeEventListener("scroll", updateScrollButtons);
+        }
+    }, []);
+
+
+    const handleCountryClick = (country) => {
+        navigate('/feed', { state: { presetLocation: country } });
+    };
+      
+      
     return (
         <Box w="85%" m="auto" pt="15px" textAlign="left" mt="40px" position="relative">
-            <Text fontWeight="700" fontSize='3xl'>Countries to Explore</Text>
-            <Text fontSize='md'>Recommended countries to explore</Text>
+            <Text fontWeight="700" fontSize="3xl">Countries to Explore</Text>
+            <Text fontSize="md">Recommended countries to explore</Text>
             <Box position="relative">
-                <IconButton
-                    aria-label="Scroll left"
-                    icon={<ChevronLeftIcon />}
-                    position="absolute"
-                    left="-20px"
-                    top="50%"
-                    transform="translateY(-50%)"
-                    zIndex="1"
-                    onClick={() => scroll(-300)}
-                />
-                <Box 
+                {canScrollLeft && (
+                    <IconButton
+                        aria-label="Scroll left"
+                        icon={<ChevronLeftIcon />}
+                        position="absolute"
+                        left="-42px"
+                        top="45.5%"
+                        transform="translateY(-50%)"
+                        zIndex="1"
+                        onClick={() => scroll(-300)}
+                        width="30px"
+                        height="300px"
+                        bg="transparent"
+                        _hover={{ bg: "transparent" }}
+                    />
+                )}
+                <Box
                     ref={scrollRef}
-                    display="flex" 
-                    overflowX="auto" 
-                    gap="15px" 
-                    mt="15px" 
+                    display="flex"
+                    overflowX="auto"
+                    gap="15px"
+                    mt="15px"
                     css={{
                         '&::-webkit-scrollbar': {
                             display: 'none',
@@ -84,38 +118,58 @@ function HomeCountries() {
                         'scrollBehavior': 'smooth',
                     }}
                 >
-                    {data && data.map((el) => (
-                        <Link 
+                    {data.map((el) => (
+                        <Box 
                             key={el.id} 
-                            href={`?country=${el.title.toLowerCase().replace(' ', '-')}`}
-                            _hover={{ textDecoration: 'none' }}
+                            onClick={() => handleCountryClick(el.title)}
+                            cursor="pointer"
+                            bg="white"
+                            pb="30px"
+                            position="relative"
+                            textAlign="left"
+                            flexShrink="0"
+                            w="300px"
+                            transition="transform 0.3s ease-in-out"
+                            _hover={{ transform: "scale(1.05)" }}
                         >
-                            <Box 
-                                bg="white" 
-                                pb="30px" 
-                                position="relative" 
-                                textAlign="left"
-                                flexShrink="0"
-                                w="300px"
-                                transition="transform 0.3s ease-in-out"
-                                _hover={{ transform: "scale(1.05)" }}
+                            <Image
+                                filter="auto"
+                                brightness="65%"
+                                src={el.img}
+                                alt="img"
+                                w="100%"
+                                h="300px"
+                                objectFit="cover"
+                            />
+                            <Text
+                                left="10px"
+                                color="white"
+                                position="absolute"
+                                bottom="30px"
+                                fontWeight="900"
+                                fontSize="3xl"
                             >
-                                <Image filter='auto' brightness='65%' src={el.img} alt="img" w="100%" h="300px" objectFit="cover" />
-                                <Text left="10px" color="white" position="absolute" bottom="30px" fontWeight="900" fontSize='3xl'>{el.title}</Text>
-                            </Box>
-                        </Link>
+                                {el.title}
+                            </Text>
+                        </Box>
                     ))}
                 </Box>
-                <IconButton
-                    aria-label="Scroll right"
-                    icon={<ChevronRightIcon />}
-                    position="absolute"
-                    right="-20px"
-                    top="50%"
-                    transform="translateY(-50%)"
-                    zIndex="1"
-                    onClick={() => scroll(300)}
-                />
+                {canScrollRight && (
+                    <IconButton
+                        aria-label="Scroll right"
+                        icon={<ChevronRightIcon />}
+                        position="absolute"
+                        right="-42px"
+                        top="45.5%"
+                        transform="translateY(-50%)"
+                        zIndex="1"
+                        onClick={() => scroll(300)}
+                        width="30px"
+                        height="300px"
+                        bg="transparent"
+                        _hover={{ bg: "transparent" }}
+                    />
+                )}
             </Box>
         </Box>
     );
