@@ -20,8 +20,10 @@ function CreatePost() {
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
   const [suggestions, setSuggestions] = useState([]);
-  const [locationDescription, setLocationDescription] = useState('');
-  const [locationPlaceId, setLocationPlaceId] = useState('');
+  const [location, setLocation] = useState({
+    description: '',
+    place_id: ''
+  });
   const toast = useToast();
   const navigate = useNavigate();
   const inputRef = useRef(null);
@@ -39,15 +41,17 @@ function CreatePost() {
       setBusinessWebsite(post.postType === 'Business' ? post.businessWebsite : '');
       setFromDate(post.postType === 'Personal' ? post.fromDate : '');
       setToDate(post.postType === 'Personal' ? post.toDate : '');
-      setLocationDescription(post.location.description);
-      setLocationPlaceId(post.location.placeId);
+      setLocation(post.location);
     }
   }, [post]);
 
   const handleInputChange = async (event) => {
     const value = event.target.value;
-    setLocationDescription(value);
-    setLocationPlaceId('');
+    setLocation(prevState => ({
+      ...prevState,
+      description: value,
+      place_id: prevState.description === value ? prevState.place_id : '' // Only reset place_id if the description changes
+    }));
     if (value.length > 1) {
       try {
         const results = await getPlaceSuggestions(value);
@@ -62,8 +66,10 @@ function CreatePost() {
   };
 
   const handleSuggestionClick = (suggestion) => {
-    setLocationDescription(suggestion.description);
-    setLocationPlaceId(suggestion.place_id);
+    setLocation({
+      description: suggestion.description,
+      place_id: suggestion.place_id
+    });
     setSuggestions([]);
   };
 
@@ -89,7 +95,7 @@ function CreatePost() {
           setUploadProgress(progress);
         }
       });
-      return response.data.file.location; // Return the uploaded image URL
+      return response.data.imageId; // Return the uploaded image ID
     } catch (error) {
       console.error('Error uploading image:', error);
       throw new Error('Image upload failed');
@@ -100,26 +106,23 @@ function CreatePost() {
     e.preventDefault();
 
     try {
-      let imageUrl = '';
+      let imageId = '';
       if (image) {
-        imageUrl = await uploadImage();
+        imageId = await uploadImage();
       }
 
       const postData = {
         postType,
         title,
-        location: {
-          description: locationDescription,
-          place_id: locationPlaceId
-        },
+        location,
         category,
         body,
-        image: imageUrl,
+        image: imageId,
         rating: postType === 'Personal' ? rating : undefined,
         fromDate: postType === 'Personal' ? fromDate : undefined,
         toDate: postType === 'Personal' ? toDate : undefined,
         businessWebsite: postType === 'Business' ? businessWebsite : undefined
-    };
+      };
 
       const url = postId ? `http://localhost:3001/api/posts/${postId}` : 'http://localhost:3001/api/posts';
       const method = postId ? 'put' : 'post';
@@ -179,7 +182,7 @@ function CreatePost() {
             <Input
               ref={inputRef}
               type="text"
-              value={locationDescription}
+              value={location.description}
               onChange={handleInputChange}
             />
             {suggestions.length > 0 && (
@@ -274,6 +277,3 @@ function CreatePost() {
 }
 
 export default CreatePost;
-
-
-

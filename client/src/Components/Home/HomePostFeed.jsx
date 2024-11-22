@@ -1,27 +1,38 @@
-import { Box, Button, Image, Text, VStack, HStack, IconButton, Heading } from '@chakra-ui/react'
-import { ArrowUpIcon, ArrowDownIcon, StarIcon } from '@chakra-ui/icons'
-import React, { useState, useEffect } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import axios from 'axios'
+import { Box, Button, Image, Text, VStack, HStack, IconButton, Heading } from '@chakra-ui/react';
+import { ArrowUpIcon, ArrowDownIcon, StarIcon } from '@chakra-ui/icons';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import SubNav from '../Subnav';
 
 const HomePostFeed = () => {
-  const [posts, setPosts] = useState([])
+  const [posts, setPosts] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const postsPerPage = 10;
+
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const response = await axios.get('http://localhost:3001/api/posts')
-        console.log('Fetched posts:', response.data);
-        setPosts(response.data)
-      } catch (error) {
-        console.error('Error fetching posts:', error)
-      }
-    }
+        const response = await axios.get('http://localhost:3001/api/posts');
+        const postsData = response.data;
 
-    fetchPosts()
-  }, [])
+        // Fetch image URLs for each post
+        const postsWithImages = await Promise.all(postsData.map(async (post) => {
+          if (post.image) {
+            const imageResponse = await axios.get(`http://localhost:3001/images/${post.image}`);
+            post.imageUrl = imageResponse.data.url;
+          }
+          return post;
+        }));
+
+        setPosts(postsWithImages);
+      } catch (error) {
+        console.error('Error fetching posts:', error);
+      }
+    };
+
+    fetchPosts();
+  }, []);
 
   // Calculate the posts to display on the current page
   const indexOfLastPost = currentPage * postsPerPage;
@@ -59,15 +70,14 @@ const HomePostFeed = () => {
         </Button>
       </Box>
     </Box>
-  )
-}
+  );
+};
 
 const Post = ({ post }) => {
-  const [votes, setVotes] = useState(post.upvotes - post.downvotes)
-  const [userVote, setUserVote] = useState(0) // 0: no vote, 1: upvoted, -1: downvoted
-  const [isBookmarked, setIsBookmarked] = useState(false)
+  const [votes, setVotes] = useState(post.upvotes - post.downvotes);
+  const [userVote, setUserVote] = useState(0); // 0: no vote, 1: upvoted, -1: downvoted
+  const [isBookmarked, setIsBookmarked] = useState(false);
   const navigate = useNavigate();
-
 
   useEffect(() => {
     // Check if the post is already bookmarked on mount
@@ -79,29 +89,29 @@ const Post = ({ post }) => {
 
   const handleUpvote = () => {
     if (userVote === 1) {
-      setVotes(votes - 1)
-      setUserVote(0)
+      setVotes(votes - 1);
+      setUserVote(0);
     } else if (userVote === -1) {
-      setVotes(votes + 2)
-      setUserVote(1)
+      setVotes(votes + 2);
+      setUserVote(1);
     } else {
-      setVotes(votes + 1)
-      setUserVote(1)
+      setVotes(votes + 1);
+      setUserVote(1);
     }
-  }
+  };
 
   const handleDownvote = () => {
     if (userVote === -1) {
-      setVotes(votes + 1)
-      setUserVote(0)
+      setVotes(votes + 1);
+      setUserVote(0);
     } else if (userVote === 1) {
-      setVotes(votes - 2)
-      setUserVote(-1)
+      setVotes(votes - 2);
+      setUserVote(-1);
     } else {
-      setVotes(votes - 1)
-      setUserVote(-1)
+      setVotes(votes - 1);
+      setUserVote(-1);
     }
-  }
+  };
 
   const handleBookmark = (e) => {
     e.stopPropagation();
@@ -111,21 +121,21 @@ const Post = ({ post }) => {
     const isAlreadyBookmarked = bookmarks.some((bookmark) => bookmark._id === post._id);
 
     if (isAlreadyBookmarked) {
-        bookmarks = bookmarks.filter((bookmark) => bookmark._id !== post._id);
+      bookmarks = bookmarks.filter((bookmark) => bookmark._id !== post._id);
     } else {
-        bookmarks.push(post);
+      bookmarks.push(post);
     }
 
     localStorage.setItem("bookmarkedPosts", JSON.stringify(bookmarks));
     setIsBookmarked(!isAlreadyBookmarked);
   };
 
-  const openPost = () => { 
+  const openPost = () => {
     navigate(`/view-post/${post._id}`);
   };
 
   return (
-    <Box w="100%" p={4} borderWidth="1px" borderRadius="lg" overflow="hidden" _hover={{ bg: 'gray.100' }} onClick={openPost}> 
+    <Box w="100%" p={4} borderWidth="1px" borderRadius="lg" overflow="hidden" _hover={{ bg: 'gray.100' }} onClick={openPost}>
       <VStack spacing={4} align="start">
         <HStack spacing={4} align="start">
           <VStack spacing={2} align="center">
@@ -149,7 +159,7 @@ const Post = ({ post }) => {
                 <Text fontSize="2xl" fontWeight="bold">{post.title}</Text>
                 <Text noOfLines={5} textAlign="left">{post.body}</Text>
               </VStack>
-              <Image boxSize="250px" src={post.images[0]} alt={post.title} />
+              <Image boxSize="250px" src={post.imageUrl || "https://via.placeholder.com/250"} alt={post.title} />
             </HStack>
           </Link>
         </HStack>
@@ -164,8 +174,7 @@ const Post = ({ post }) => {
         </HStack>
       </VStack>
     </Box>
-  )
-  }
-
+  );
+};
 
 export default HomePostFeed;
