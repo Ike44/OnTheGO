@@ -86,7 +86,7 @@ function SearchResults() {
   };
 
   return (
-    <Box w="85%" m="auto" p="80px 10px" backgroundColor="gray.100">
+    <Box w="85%" m="auto" p="25px 10px" backgroundColor="gray.100">
       <form onSubmit={(e) => { e.preventDefault(); handleSearch(searchTerm); }}>
         <SearchSuggestions initialQuery={searchTerm} onSearch={handleSearch} />
       </form>

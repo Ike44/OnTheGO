@@ -7,7 +7,8 @@ import SearchResults from '../Pages/searchResults';
 import CreatePost from "../Pages/CreatePost";
 import ViewPost from '../Pages/ViewPost';
 import Bookmarks from "../Pages/Bookmarks";
-
+import HomeCountries from "../Components/Home/HomeCountries";
+import HomePostFeed from "../Components/Home/HomePostFeed";
 
 
 function AllRoutes(){
@@ -18,9 +19,10 @@ function AllRoutes(){
         <Route path="/bookmarks" element={<Bookmarks />} ></Route>
         <Route path="/contactUs" element={<ContactUs />} />
         <Route path="/searchResults" element={<SearchResults />} />
-        <Route path="/edit-post/:postId" element={<CreatePost />} /> 
         <Route path="/create-post" element={<CreatePost />} ></Route> 
         <Route path="/view-post/:postId" element={<ViewPost />} />  
+        <Route path="/countries" element={<HomeCountries />} />
+        <Route path="/feed" element={<HomePostFeed />} />
 
     </Routes>
 }
