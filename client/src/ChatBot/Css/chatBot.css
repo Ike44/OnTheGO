@@ -75,7 +75,7 @@
   overflow-y: scroll;
   padding: 15px;
   border-radius: 4px;
-  max-height: calc(96vh - 160px);
+  max-height: 350px;
 }
 
 .chatBot .chatBody .chatSession .container {
@@ -234,7 +234,7 @@
 
 .chatBot.active {
   width: 400px;
-  height: 96vh;
+  height: 500px;
   background: #ffffff;
   transition: all 0.3s ease;
 }
@@ -242,5 +242,6 @@
 @media (max-width: 800px) {
   .chatBot.active {
     width: calc(100vw - 4vh) !important;
+    height: 450px;
   }
 }
