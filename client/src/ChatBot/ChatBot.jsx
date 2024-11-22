@@ -61,7 +61,7 @@ const ChatBot = () => {
     } else {
       setMessages([...messages, {
         type: 'reply',
-        text: 'Type something!'
+        text: 'Please type something so I can better assist you.'
       }]);
     }
   };
@@ -114,7 +114,8 @@ const ChatBot = () => {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            marginBottom: '10px'
+            marginBottom: '10px',
+            width: '100%'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <img 
