@@ -61,7 +61,7 @@ const ChatBot = () => {
     } else {
       setMessages([...messages, {
         type: 'reply',
-        text: 'Please type something so I can better assit you.'
+        text: 'Please type something so I can better assist you.'
       }]);
     }
   };
