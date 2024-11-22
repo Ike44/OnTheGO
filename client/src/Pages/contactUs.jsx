@@ -1,6 +1,7 @@
 import { Box, Button, Input, Textarea, Text, useToast } from "@chakra-ui/react";
 import { useState } from "react";
-import ChatBot from '../ChatBot/ChatBot'
+import emailjs from 'emailjs-com'; 
+import ChatBot from '../ChatBot/ChatBot';
 
 function ContactUs() {
   const [name, setName] = useState("");
@@ -8,15 +9,50 @@ function ContactUs() {
   const [message, setMessage] = useState("");
   const toast = useToast();
 
-  const handleSubmit = (e) => { e.preventDefault(); setName(""); setEmail(""); setMessage("");
+  const handleSubmit = (e) => {
+    e.preventDefault();
 
-    toast({
-      title: "Message Sent", description: "We've received your message, and you'll hear back from us shortly!", 
-      status: "success", duration: 3500, isClosable: true,});
+    const templateParams = {
+      name: name,
+      email: email,
+      message: message,
+    };
+
+    emailjs
+      .send(
+        'service_hk5xa04',
+        'template_zq6s7vg', 
+        templateParams,
+        '3BypnuEF-w9_OaAci' 
+      )
+      .then((response) => {
+        console.log('SUCCESS!', response.status, response.text);
+        toast({
+          title: "Message Sent",
+          description: "We've sent a confirmation email to your address!",
+          status: "success",
+          duration: 3500,
+          isClosable: true,
+        });
+
+        setName("");
+        setEmail("");
+        setMessage("");
+      })
+      .catch((error) => {
+        console.error('FAILED...', error);
+        toast({
+          title: "Message Failed",
+          description: "Something went wrong. Please try again later.",
+          status: "error",
+          duration: 3500,
+          isClosable: true,
+        });
+      });
   };
 
   return (
-    <Box w="50%" m="auto" p="200px">
+    <Box w="85%" m="auto" p="200px">
       <Text fontSize="2xl" mb="10px">Contact Us</Text>
       <form onSubmit={handleSubmit}>
         <Input

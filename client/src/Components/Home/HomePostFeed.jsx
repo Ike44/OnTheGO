@@ -207,6 +207,13 @@ const Post = ({ post }) => {
     navigate(`/view-post/${post._id}`);
   };
 
+  const viewInGoogleMaps = (e) => {
+    e.stopPropagation(); 
+    const query = encodeURIComponent(post.location.description);
+    const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${query}`;
+    window.open(googleMapsUrl, '_blank'); 
+  };
+
   return (
     <Box w="100%" p={4} borderWidth="1px" borderRadius="lg" overflow="hidden" _hover={{ bg: 'gray.100' }} onClick={openPost}>
       <VStack spacing={4} align="start">
@@ -237,7 +244,7 @@ const Post = ({ post }) => {
           </Link>
         </HStack>
         <HStack mt={4} pt={4} w="100%" justify="flex-end" spacing={4}>
-          <Button colorScheme="teal" variant="outline" onClick={(e) => e.stopPropagation()}>View in Google Maps</Button>
+          <Button colorScheme="teal" variant="outline" onClick={viewInGoogleMaps}>View in Google Maps</Button>
           <IconButton
             icon={<StarIcon />}
             aria-label="Bookmark"
