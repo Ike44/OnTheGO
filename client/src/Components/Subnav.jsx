@@ -179,8 +179,8 @@ function SubNav({ onApplyFilters, hcFilter }) {
                         <RangeSliderTrack bg="gray.200" ml="-6px">
                         <RangeSliderFilledTrack bg="gray.400" />
                         </RangeSliderTrack>
-                        <RangeSliderThumb boxSize={5} index={0} bg="gray.400" ml="-7px" />
-                        <RangeSliderThumb boxSize={5} index={1} bg="gray.400" ml="-12px" />
+                        <RangeSliderThumb boxSize={5} index={0} bg="gray.400" ml={rating[0] === rating[1] ? "-8px" : "-7px"}  zIndex={rating[0] === rating[1] ? 1 : 2} />
+                        <RangeSliderThumb boxSize={5} index={1} bg="gray.400" ml={rating[0] === rating[1] ? "-8px" : "-12px"} zIndex={rating[0] === rating[1] ? 2 : 1}/>
                     </RangeSlider>
 
                     <Box w="90%" display="flex" justifyContent="space-between" mt="2" fontSize="xs" color="gray.600">
