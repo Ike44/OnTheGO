@@ -12,13 +12,29 @@ const ChatBot = () => {
   const chatSessionRef = useRef(null);
   const textAreaRef = useRef(null);
 
+  // Load messages from sessionStorage when component mounts
+  useEffect(() => {
+    const storedMessages = sessionStorage.getItem('chatBotMessages');
+    if (storedMessages) {
+      setMessages(JSON.parse(storedMessages));
+      setIteration(1); // Prevent initial message if there's history
+    }
+  }, []);
+
+  // Save messages to sessionStorage whenever they change
+  useEffect(() => {
+    if (messages.length > 0) {
+      sessionStorage.setItem('chatBotMessages', JSON.stringify(messages));
+    }
+  }, [messages]);
+
   const validateMessage = () => {
     return inputMessage !== '' && inputMessage !== 'Type here...';
   };
 
   const handleOpen = () => {
     setIsOpen(true);
-    if (iteration === 0) {
+    if (iteration === 0 && messages.length === 0) {
       setTimeout(() => {
         initiateConversation();
       }, 1000);

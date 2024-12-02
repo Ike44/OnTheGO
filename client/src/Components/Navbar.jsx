@@ -60,9 +60,11 @@ function Navbar() {
                             onMouseLeave={onClose}
                         />
                         <MenuList onMouseEnter={onOpen} onMouseLeave={onClose}>
-                            <MenuItem>Account Info</MenuItem>
+                            <RouterLink to="/account_info">
+                                <MenuItem>Account Info</MenuItem>
+                            </RouterLink>
                             <RouterLink to="/bookmarks">
-                        <MenuItem>Bookmarks</MenuItem>
+                                <MenuItem>Bookmarks</MenuItem>
                             </RouterLink>
                     </MenuList>
                     </Menu>
