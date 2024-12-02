@@ -9,3 +9,7 @@
 dist/
 build/
 coverage/
+
+# Ignore specific scripts
+removeOldPosts.js
+uploadAwsInfo.js
