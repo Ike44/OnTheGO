@@ -40,6 +40,19 @@ router.get('/google-client-secret', async (req, res) => {
   }
 });
 
+// Endpoint to get the OpenAI API key
+router.get('/openai-api-key', async (req, res) => {
+  try {
+    const api = await Api.findOne({ name: 'OPENAI_API_KEY' });
+    if (!api) {
+      return res.status(404).json({ message: 'API key not found' });
+    }
+    res.json({ key: api.key });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 // Verify Google ID token
 router.post('/auth/google/verify', async (req, res) => {
   try {

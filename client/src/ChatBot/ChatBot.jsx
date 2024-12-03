@@ -2,11 +2,12 @@ import React, { useState, useEffect, useRef } from 'react';
 import './Css/chatBot.css';
 import sendIcon from './Gfx/send.svg';
 import chatbotLogo from './Gfx/chatbot.png';
+import axios from 'axios';
 
 const ChatBot = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([]);
-  const [inputMessage, setInputMessage] = useState('Type here...');
+  const [inputMessage, setInputMessage] = useState('');
   const [iteration, setIteration] = useState(0);
   
   const chatSessionRef = useRef(null);
@@ -49,30 +50,39 @@ const ChatBot = () => {
   const initiateConversation = () => {
     setMessages([{
       type: 'reply',
-      text: 'Hello! I am ChatBot. How can I help you today?'
+      text: 'Hello! I am Brenda, your customer service representative for OnTheGo. How can I help you today?'
     }]);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (validateMessage()) {
       const newMessages = [...messages];
       newMessages.push({
         type: 'message',
         text: inputMessage
       });
-      
+
       setMessages(newMessages);
-      
-      setTimeout(() => {
+
+      try {
+        const response = await axios.post('http://localhost:3001/api/chatbot/chat', { message: inputMessage });
+        const reply = response.data.reply;
+
         setMessages([...newMessages, {
           type: 'reply',
-          text: '{{ reply }}'
+          text: reply
         }]);
-      }, 750);
+      } catch (error) {
+        console.error('Error communicating with backend:', error);
+        setMessages([...newMessages, {
+          type: 'reply',
+          text: 'Sorry, there was an error processing your request.'
+        }]);
+      }
 
-      setInputMessage('Type here...');
+      setInputMessage('');
       textAreaRef.current?.focus();
     } else {
       setMessages([...messages, {
@@ -90,7 +100,14 @@ const ChatBot = () => {
 
   const handleInputBlur = () => {
     if (!validateMessage()) {
-      setInputMessage('Type here...');
+      setInputMessage('');
+    }
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSubmit(e);
     }
   };
 
@@ -139,7 +156,7 @@ const ChatBot = () => {
                 alt="ChatBot" 
                 style={{ height: '30px', width: 'auto' }}
               />
-              <span style={{ fontSize: '16px', fontWeight: '500' }}>ChatBot Assistant</span>
+              <span style={{ fontSize: '16px', fontWeight: '500' }}>Chat with Brenda</span>
             </div>
             <button 
               onClick={handleClose}
@@ -183,6 +200,7 @@ const ChatBot = () => {
                 onChange={(e) => setInputMessage(e.target.value)}
                 onFocus={handleInputFocus}
                 onBlur={handleInputBlur}
+                onKeyPress={handleKeyPress}
                 placeholder="Type your message..."
               />
               <button type="submit" className="sendButton" id="sendButton">
