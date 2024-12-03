@@ -13,7 +13,7 @@ import HomePostFeed from '../Components/Home/HomePostFeed'
 
 const Home = () => {
   return (
-    <Box>
+    <Box bg="#FFFFFF">
       <Homeone />
       {/* <Hometwo /> */}
       {/* <Homethree /> */}

@@ -239,10 +239,10 @@ function SubNav({ onApplyFilters, hcFilter }) {
 
             {/* Reset and Apply Buttons */}
             <Box display="flex" gap="10px">
-                <Button onClick={resetFilters} colorScheme="gray" border="1.5px solid gray" h="50px" w="100%" borderRadius="xl">
+                <Button onClick={resetFilters} colorscheme="gray" border="1.5px solid gray" h="50px" w="100%" borderRadius="xl">
                     Reset
                 </Button>
-                <Button onClick={applyFilters} colorScheme="gray" border="1.5px solid gray" h="50px" w="100%" borderRadius="xl">
+                <Button onClick={applyFilters} colorscheme="gray" border="1.5px solid gray" h="50px" w="100%" borderRadius="xl">
                     Apply
                 </Button>
             </Box>
