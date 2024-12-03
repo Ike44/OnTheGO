@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Box, Image, VStack, Text, Heading, Button, useDisclosure, Grid } from '@chakra-ui/react';
 import { Modal, ModalOverlay, ModalContent, ModalBody, ModalCloseButton } from '@chakra-ui/react';
 import { MdBookmark } from 'react-icons/md';
-import ChatBot from '../ChatBot/ChatBot'
 
 
 
@@ -83,7 +82,6 @@ function Bookmarks() {
                     </ModalBody>
                 </ModalContent>
             </Modal>
-            <ChatBot />
         </Box>
     );
 }
