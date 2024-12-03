@@ -6,7 +6,6 @@ import { initGoogleMapsAPI, getPlaceDetails } from '../google/Google';
 import SearchSuggestions from "../google/SearchSuggestions";
 import Map from "../google/Map";
 import axios from 'axios';
-import ChatBot from '../ChatBot/ChatBot'
 
 function SearchResults() {
   const navigate = useNavigate();
@@ -154,7 +153,6 @@ function SearchResults() {
           </Link>
         ))}
       </Box>
-      <ChatBot />
     </Box>
   );
 }

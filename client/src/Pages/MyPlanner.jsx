@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, ModalOverlay, ModalContent, ModalCloseButton, ModalBody, Box, Button, Image } from '@chakra-ui/react';
 import { CheckIcon, TimeIcon, AddIcon } from '@chakra-ui/icons';
-import ChatBot from '../ChatBot/ChatBot'
 
 
 const MyPlanner = () => {
@@ -207,7 +206,6 @@ const MyPlanner = () => {
                     objectFit="cover"
                     style={{ marginLeft: 'auto', marginRight: '0', marginTop: '-350px', opacity: 0.8, }} 
                 />
-                <ChatBot />
             </Box>
         </div>
 

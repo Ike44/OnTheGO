@@ -1,7 +1,6 @@
 import { Box, Button, Input, Textarea, Text, useToast } from "@chakra-ui/react";
 import { useState } from "react";
 import emailjs from 'emailjs-com'; 
-import ChatBot from '../ChatBot/ChatBot';
 
 function ContactUs() {
   const [name, setName] = useState("");
@@ -78,7 +77,6 @@ function ContactUs() {
           Submit
         </Button>
       </form>
-      <ChatBot />
     </Box>
   );
 }

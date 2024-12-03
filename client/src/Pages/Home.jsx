@@ -10,7 +10,6 @@ import Homethree from '../Components/Home/Homethree'
 import Hometwo from '../Components/Home/Hometwo'
 import HomeCountries from '../Components/Home/HomeCountries'
 import HomePostFeed from '../Components/Home/HomePostFeed'
-import ChatBot from '../ChatBot/ChatBot'
 
 const Home = () => {
   return (
@@ -25,7 +24,6 @@ const Home = () => {
       <HomePostFeed />
       {/* <Homeseven /> */}
       <Homeeight />
-      <ChatBot />
     </Box>
   )
 }

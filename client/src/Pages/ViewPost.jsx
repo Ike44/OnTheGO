@@ -6,7 +6,6 @@ import { FaCommentDots, FaStar, FaEllipsisV } from 'react-icons/fa';
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import ChatBot from '../ChatBot/ChatBot';
 
 function ViewPost() {
   const { postId } = useParams();
@@ -131,7 +130,6 @@ function ViewPost() {
             </HStack>
           </VStack>
         </Box>
-        <ChatBot />
       </Box>
     </Flex>
   );
