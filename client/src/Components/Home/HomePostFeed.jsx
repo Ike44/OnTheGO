@@ -217,7 +217,7 @@ const Post = ({ post }) => {
   return (
     <Box w="100%" p={4} borderWidth="1px" borderRadius="lg" overflow="hidden" _hover={{ bg: 'gray.100' }} onClick={openPost}>
       <VStack spacing={4} align="start">
-        <HStack spacing={4} align="start">
+        <HStack spacing={4} align="start" w="100%">
           <VStack spacing={2} align="center">
             <IconButton
               icon={<ArrowUpIcon />}
@@ -233,7 +233,7 @@ const Post = ({ post }) => {
               colorScheme={userVote === -1 ? 'red' : 'gray'}
             />
           </VStack>
-          <Link to={`/post/${post._id}`} style={{ textDecoration: 'none', width: '100%' }}>
+          <Link to={`/view-post/${post._id}`} style={{ textDecoration: 'none', width: '100%' }}>
             <HStack align="start" spacing={4} flex="1">
               <VStack align="start" spacing={2} flex="1">
                 <Text fontSize="2xl" fontWeight="bold">{post.title}</Text>
