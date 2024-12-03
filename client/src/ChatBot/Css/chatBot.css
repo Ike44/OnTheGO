@@ -104,6 +104,7 @@
   border-radius: 15px 15px 15px 5px;
   background: #1a73e8;
   color: white;
+  text-align: left;
 }
 
 .chatBot .chatBody .chatSession .container .message {
@@ -112,6 +113,7 @@
   border-radius: 15px 15px 5px 15px;
   background: #f5f5f5;
   color: #333333;
+  text-align: left;
 }
 
 .chatBot .chatBody .chatSession .container .animateChat {
@@ -139,10 +141,12 @@
 
 .chatBot .chatBody .chatSession .container#replyContainer {
   justify-content: flex-start;
+  text-align: left;
 }
 
 .chatBot .chatBody .chatSession .container#messageContainer {
   justify-content: flex-end;
+  text-align: left;
 }
 
 .chatBot .chatBody.active {

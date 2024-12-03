@@ -11,6 +11,7 @@ const apiRoutes = require('./routes/apiRoutes');
 const imageRoutes = require('./routes/imageRoutes');
 const awsRoutes = require('./routes/awsRoutes');
 const postFilterRoutes = require('./routes/postFilterRoutes');
+const chatbotRoutes = require('./routes/chatbotRoutes');
 
 
 const app = express();
@@ -28,6 +29,7 @@ app.use('/api', apiRoutes);
 app.use('/images', imageRoutes);
 app.use('/api', awsRoutes);
 app.use('/api/filters', postFilterRoutes);
+app.use('/api/chatbot', chatbotRoutes);
 
 
 const mongoURI = process.env.MONGO_URI;
