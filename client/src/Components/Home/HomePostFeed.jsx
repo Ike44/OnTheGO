@@ -24,13 +24,13 @@ const HomePostFeed = () => {
           // Simulate "Apply" button click for presetLocation
           const filters = { selectedCountry: presetLocation };
           const response = await axios.post('http://localhost:3001/api/filters', filters);
-  
+
           if (response.data.message) {
             setNoPostsMessage(response.data.message);
             setPosts([]);
           } else {
             const postsData = response.data.posts;
-  
+
             // Fetch image URLs for each post
             const postsWithImages = await Promise.all(
               postsData.map(async (post) => {
@@ -41,7 +41,7 @@ const HomePostFeed = () => {
                 return post;
               })
             );
-  
+
             setPosts(postsWithImages);
             setNoPostsMessage('');
           }
@@ -49,7 +49,7 @@ const HomePostFeed = () => {
           // Fetch all posts if no presetLocation is set
           const response = await axios.get('http://localhost:3001/api/posts');
           const postsData = response.data;
-  
+
           // Fetch image URLs for each post
           const postsWithImages = await Promise.all(
             postsData.map(async (post) => {
@@ -60,7 +60,7 @@ const HomePostFeed = () => {
               return post;
             })
           );
-  
+
           setPosts(postsWithImages);
         }
       } catch (error) {
@@ -70,10 +70,10 @@ const HomePostFeed = () => {
         setLoading(false);
       }
     };
-  
+
     fetchPosts();
   }, [presetLocation]);
-  
+
 
   // Calculate the posts to display on the current page
   const indexOfLastPost = currentPage * postsPerPage;
@@ -107,7 +107,7 @@ const HomePostFeed = () => {
     } catch (error) {
       console.error('Error fetching filtered posts:', error.response || error);
       setNoPostsMessage(`Error fetching filtered posts: ${error.response?.data?.error || error.message}`)
-   } finally {
+    } finally {
       setLoading(false)
     }
   }
@@ -148,7 +148,7 @@ const HomePostFeed = () => {
 
 const Post = ({ post }) => {
   const [votes, setVotes] = useState(post.upvotes - post.downvotes);
-  const [userVote, setUserVote] = useState(0); // 0: no vote, 1: upvoted, -1: downvoted
+  const [userVote, setUserVote] = useState(0);
   const [isBookmarked, setIsBookmarked] = useState(false);
   const navigate = useNavigate();
 
@@ -160,31 +160,35 @@ const Post = ({ post }) => {
     setIsBookmarked(isAlreadyBookmarked);
   }, [post._id]);
 
-  const handleUpvote = () => {
-    if (userVote === 1) {
-      setVotes(votes - 1);
-      setUserVote(0);
-    } else if (userVote === -1) {
-      setVotes(votes + 2);
-      setUserVote(1);
+  useEffect(() => {
+    setVotes(post.upvotes - post.downvotes);
+  }, [post.upvotes, post.downvotes]);
+
+
+  const handleVote = async (direction) => {
+    const isUpvote = direction === 'upvote';
+    let newVoteStatus;
+
+    if (isUpvote) {
+      newVoteStatus = userVote === 1 ? 0 : 1;
     } else {
-      setVotes(votes + 1);
-      setUserVote(1);
+      newVoteStatus = userVote === -1 ? 0 : -1;
+    }
+
+    let voteDiff = newVoteStatus - userVote;
+
+    try {
+      const response = await axios.post(`http://localhost:3001/api/posts/${post._id}/${direction}`, { voteDiff });
+      if (response.status === 200) {
+        // Update local state with new votes and vote status
+        setVotes(votes + voteDiff);
+        setUserVote(newVoteStatus);
+      }
+    } catch (error) {
+      console.error(`Error when trying to ${direction} the post:`, error);
     }
   };
 
-  const handleDownvote = () => {
-    if (userVote === -1) {
-      setVotes(votes + 1);
-      setUserVote(0);
-    } else if (userVote === 1) {
-      setVotes(votes - 2);
-      setUserVote(-1);
-    } else {
-      setVotes(votes - 1);
-      setUserVote(-1);
-    }
-  };
 
   const handleBookmark = (e) => {
     e.stopPropagation();
@@ -208,10 +212,10 @@ const Post = ({ post }) => {
   };
 
   const viewInGoogleMaps = (e) => {
-    e.stopPropagation(); 
+    e.stopPropagation();
     const query = encodeURIComponent(post.location.description);
     const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${query}`;
-    window.open(googleMapsUrl, '_blank'); 
+    window.open(googleMapsUrl, '_blank');
   };
 
   return (
@@ -222,16 +226,17 @@ const Post = ({ post }) => {
             <IconButton
               icon={<ArrowUpIcon />}
               aria-label="Upvote"
-              onClick={(e) => { e.stopPropagation(); handleUpvote(); }}
+              onClick={(e) => { e.stopPropagation(); handleVote('upvote'); }}
               colorScheme={userVote === 1 ? 'green' : 'gray'}
             />
             <Text>{votes}</Text>
             <IconButton
               icon={<ArrowDownIcon />}
               aria-label="Downvote"
-              onClick={(e) => { e.stopPropagation(); handleDownvote(); }}
+              onClick={(e) => { e.stopPropagation(); handleVote('downvote'); }}
               colorScheme={userVote === -1 ? 'red' : 'gray'}
             />
+
           </VStack>
           <Link to={`/view-post/${post._id}`} style={{ textDecoration: 'none', width: '100%' }}>
             <HStack align="start" spacing={4} flex="1">
@@ -244,7 +249,7 @@ const Post = ({ post }) => {
           </Link>
         </HStack>
         <HStack mt={4} pt={4} w="100%" justify="flex-end" spacing={4}>
-          <Button colorScheme="#004f32" variant="outline" onClick={viewInGoogleMaps}>View in Google Maps</Button>
+          <Button colorScheme="teal" variant="outline" onClick={viewInGoogleMaps}>View in Google Maps</Button>
           <IconButton
             icon={<StarIcon />}
             aria-label="Bookmark"
@@ -254,7 +259,8 @@ const Post = ({ post }) => {
         </HStack>
       </VStack>
     </Box>
-  );
-};
+  )
+}
+
 
 export default HomePostFeed;

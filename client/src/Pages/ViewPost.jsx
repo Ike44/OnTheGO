@@ -1,9 +1,15 @@
 import {
+  AlertDialog,
+  AlertDialogBody,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogContent,
+  AlertDialogOverlay,
   Box, Button, Center, Flex, HStack, Image, Text, VStack, Divider, Textarea, Avatar,
   Menu, MenuButton, MenuItem, MenuList, IconButton
 } from '@chakra-ui/react';
 import { FaCommentDots, FaStar, FaEllipsisV } from 'react-icons/fa';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
@@ -12,6 +18,13 @@ function ViewPost() {
   const [post, setPost] = useState(null);
   const [imageUrl, setImageUrl] = useState(null);
   const navigate = useNavigate();
+  const [comments, setComments] = useState([]);
+  const [newComment, setNewComment] = useState('');
+  const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
+  const cancelRef = useRef(); // Reference for the "No" button, ensures focus management
+  const onOpenDeleteAlert = () => setIsDeleteAlertOpen(true);
+  const onCloseDeleteAlert = () => setIsDeleteAlertOpen(false);
+  
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -31,18 +44,39 @@ function ViewPost() {
     fetchPost();
   }, [postId]);
 
-  const deletePost = async () => {
+  // Fetch comments
+  useEffect(() => {
+    const fetchComments = async () => {
+      try {
+        const response = await axios.get(`http://localhost:3001/api/comments/${postId}`);
+        setComments(response.data);
+      } catch (error) {
+        console.error("Error fetching comments:", error);
+      }
+    };
+
+    fetchComments();
+  }, [postId]);  // Fetch comments when postId changes
+
+
+  const deletePostConfirmed = async () => {
     try {
       const response = await axios.delete(`http://localhost:3001/api/posts/${post._id}`);
       if (response.status === 200) {
         alert('Post deleted successfully');
-        navigate('/'); // Redirect to the list of posts or a suitable route
+        navigate('/');
       }
     } catch (error) {
       console.error('Failed to delete the post:', error);
       alert('Failed to delete the post');
     }
+    onCloseDeleteAlert();  // Close the alert dialog after handling delete
   };
+
+  if (!post) {
+    return <Center>Loading...</Center>;
+  }
+
 
   const editPost = () => {
     navigate(`/edit-post/${postId}`, { state: { post } });
@@ -57,6 +91,23 @@ function ViewPost() {
       <FaStar key={i} color={i < rating ? "gold" : "gray"} size="15px" />
     ));
   };
+
+  const submitComment = async (commentContent) => {
+    if (!commentContent.trim()) return;  // Prevent empty comments
+    try {
+      const commentData = { author: "user", content: commentContent };
+      const response = await axios.post(`http://localhost:3001/api/comments/${postId}`, commentData);
+      setComments([...comments, response.data]);
+      setNewComment('');
+      alert('Comment added successfully');
+    } catch (error) {
+      console.error("Error adding comment:", error);
+      alert('Failed to add comment');
+    }
+  };
+
+
+
 
   return (
     <Flex direction="column" pt="95px" align="center">
@@ -74,7 +125,7 @@ function ViewPost() {
           />
           <MenuList>
             <MenuItem onClick={editPost}>Edit</MenuItem>
-            <MenuItem onClick={deletePost}>Delete</MenuItem>
+            <MenuItem onClick={onOpenDeleteAlert}>Delete</MenuItem>
           </MenuList>
         </Menu>
         <Box p={5}>
@@ -105,34 +156,56 @@ function ViewPost() {
           <Text textAlign="left" mt={10}>{post.body}</Text>
         </Box>
         <Divider my={2} />
-        <Flex justify="left" align="center" p={2}>
-          <Button leftIcon={<FaCommentDots />} variant="ghost">Comment</Button>
+        <Flex justify="space-between" align="center" p={2}>
+          <Text pl={4} fontSize="lg" fontWeight="bold">Comments</Text>
         </Flex>
-        <Box px={5} pb={5}>
-          <Textarea placeholder="Write a comment..." mb={4} />
-          <VStack spacing={4} pt={4} align="stretch">
-            {/* Example comments */}
-            <HStack align="start" spacing={4}>
+        <Divider my={2} mt={2} />
+        <Flex justify="left" align="center" p={2}>
+          <HStack width="full">
+            <Textarea placeholder="Write a comment..." value={newComment} onChange={e => setNewComment(e.target.value)} />
+            <Button onClick={() => submitComment(newComment)} mt={10} colorScheme="blue">Add</Button>
+          </HStack>
+        </Flex>
+        <VStack spacing={4} align="stretch" p={5}>
+          {comments.map((comment, index) => (
+            <HStack key={index} spacing={3} align="start">
               <Avatar size="sm" src="https://via.placeholder.com/150" />
-              <VStack align="start">
-                <Text fontWeight="bold">John Smith</Text>
-                <Text>Really insightful post, thanks for sharing!</Text>
-                <Button variant="link" size="sm">Reply</Button>
+              <VStack align="start" spacing={0}>
+                <Text fontWeight="bold">{comment.author}</Text>
+                <Text color="gray.500" fontSize="sm">{new Date(comment.createdAt).toLocaleDateString()}</Text>
+                <Text>{comment.content}</Text>
               </VStack>
             </HStack>
-            <HStack align="start" spacing={4}>
-              <Avatar size="sm" src="https://via.placeholder.com/150" />
-              <VStack align="start">
-                <Text fontWeight="bold">Emily R.</Text>
-                <Text>Loved the detail on the photos, looking forward to more posts like this.</Text>
-                <Button variant="link" size="sm">Reply</Button>
-              </VStack>
-            </HStack>
-          </VStack>
-        </Box>
+          ))}
+        </VStack>
       </Box>
+      <AlertDialog
+      isOpen={isDeleteAlertOpen}
+      leastDestructiveRef={cancelRef}
+      onClose={onCloseDeleteAlert}
+    >
+      <AlertDialogOverlay>
+        <AlertDialogContent>
+          <AlertDialogHeader fontSize="lg" fontWeight="bold">
+            Delete Post
+          </AlertDialogHeader>
+          <AlertDialogBody>
+            Are you sure? You can't undo this action afterwards.
+          </AlertDialogBody>
+          <AlertDialogFooter>
+            <Button ref={cancelRef} onClick={onCloseDeleteAlert}>
+              No
+            </Button>
+            <Button colorScheme="red" onClick={deletePostConfirmed} ml={3}>
+              Yes
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialogOverlay>
+    </AlertDialog>
     </Flex>
   );
 }
+
 
 export default ViewPost;
