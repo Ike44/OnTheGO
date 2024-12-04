@@ -9,11 +9,11 @@ const Homeeight = () => {
             <Box>
                 <Image w="50%" m="auto" src="https://static.tacdn.com/img2/travelers_choice/TC_logomark_solid_cream.svg" alt="logo" />
                 <Box>
-                    <Text fontSize="35px" fontWeight="900" color="white">Travellers' Choice Best of the Best</Text>
+                    <Text fontSize="35px" fontWeight="900" color="#FFFFFF">Travellers' Choice Best of the Best</Text>
                 </Box>
             </Box>
             <Box mt="15%">
-                <Button p="10px 20px" color="white" rounded="20px" bg="black">See the Winners</Button>
+                <Button p="10px 20px" color="#FFFFFF" rounded="20px" bg="#000000">See the Winners</Button>
             </Box>
         </Box>
         <Box>

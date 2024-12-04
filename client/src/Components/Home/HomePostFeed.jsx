@@ -244,7 +244,7 @@ const Post = ({ post }) => {
           </Link>
         </HStack>
         <HStack mt={4} pt={4} w="100%" justify="flex-end" spacing={4}>
-          <Button colorScheme="teal" variant="outline" onClick={viewInGoogleMaps}>View in Google Maps</Button>
+          <Button colorScheme="#004f32" variant="outline" onClick={viewInGoogleMaps}>View in Google Maps</Button>
           <IconButton
             icon={<StarIcon />}
             aria-label="Bookmark"
