@@ -25,6 +25,10 @@ function ViewPost() {
   const onOpenDeleteAlert = () => setIsDeleteAlertOpen(true);
   const onCloseDeleteAlert = () => setIsDeleteAlertOpen(false);
   
+  const [randomCountries, setRandomCountries] = useState([]);
+  const [suggestedPosts, setSuggestedPosts] = useState([]);
+
+
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -44,22 +48,39 @@ function ViewPost() {
     fetchPost();
   }, [postId]);
 
-  // Fetch comments
   useEffect(() => {
-    const fetchComments = async () => {
+    const countriesData = [
+      { id: 1, img: "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/21/66/68/f6/caption.jpg?w=300&h=300&s=1&cx=988&cy=664&chk=v1_d1b5b3f4c384c764b7e1", title: "Mexico" },
+      { id: 2, img: "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/13/60/b0/bd/bora-bora.jpg?w=300&h=300&s=1", title: "French Polynesia" },
+      { id: 3, img: "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/1b/33/f7/dd/caption.jpg?w=300&h=300&s=1", title: "Spain" },
+      { id: 4, img: "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/16/e4/10/e4/it-was-an-amazing-experience.jpg?w=300&h=300&s=1", title: "China" },
+      { id: 5, img: "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/0c/e4/12/c9/visao-privilegiada.jpg?w=300&h=300&s=1", title: "Brazil" },
+    ];
+
+    // Shuffle and select 3-4 random countries
+    const shuffled = countriesData.sort(() => 0.5 - Math.random());
+    setRandomCountries(shuffled.slice(0, 3));
+  }, []);
+
+  useEffect(() => {
+    const fetchPosts = async () => {
       try {
-        const response = await axios.get(`http://localhost:3001/api/comments/${postId}`);
-        setComments(response.data);
+        const response = await axios.get('http://localhost:3001/api/posts'); // Adjust API endpoint as necessary
+        const allPosts = response.data;
+  
+        // Shuffle and select 3-5 random posts
+        const shuffledPosts = allPosts.sort(() => 0.5 - Math.random());
+        setSuggestedPosts(shuffledPosts.slice(0, 10));
       } catch (error) {
-        console.error("Error fetching comments:", error);
+        console.error("Error fetching posts:", error);
       }
     };
+  
+    fetchPosts();
+  }, []);
+  
 
-    fetchComments();
-  }, [postId]);  // Fetch comments when postId changes
-
-
-  const deletePostConfirmed = async () => {
+  const deletePost = async () => {
     try {
       const response = await axios.delete(`http://localhost:3001/api/posts/${post._id}`);
       if (response.status === 200) {
@@ -80,6 +101,10 @@ function ViewPost() {
 
   const editPost = () => {
     navigate(`/edit-post/${postId}`, { state: { post } });
+  };
+
+  const handleCountryClick = (country) => {
+    navigate('/feed', { state: { presetLocation: country } }); // Navigates to the feed page
   };
 
   if (!post) {
@@ -110,8 +135,24 @@ function ViewPost() {
 
 
   return (
-    <Flex direction="column" pt="95px" align="center">
-      <Box maxW="50rem" w="full" borderWidth="1px" borderRadius="lg" overflow="hidden" boxShadow="lg" bg="white" mb={20} position="relative">
+    <Flex direction="row" pt="95px" align="flex-start" justify="center" gap={10}>
+
+<Box w="20%" position="sticky" top="100px">
+  <Text fontWeight="bold" fontSize="lg" mb={4} textAlign="center">Suggested Posts</Text>
+  {suggestedPosts.map((post) => (
+    <Box
+      key={post._id}
+      mb={10}
+      cursor="pointer"
+      onClick={() => navigate(`/view-post/${post._id}`)}
+      _hover={{ textDecoration: "underline", color: "blue.500" }}
+    >
+      <Text textAlign="center">{post.title}</Text>
+    </Box>
+  ))}
+</Box>
+
+      <Box maxW="50rem" w="70%" borderWidth="1px" borderRadius="lg" overflow="hidden" boxShadow="lg" bg="white" mb={20} position="relative">
         <Menu>
           <MenuButton
             as={IconButton}
@@ -179,30 +220,48 @@ function ViewPost() {
           ))}
         </VStack>
       </Box>
-      <AlertDialog
-      isOpen={isDeleteAlertOpen}
-      leastDestructiveRef={cancelRef}
-      onClose={onCloseDeleteAlert}
-    >
-      <AlertDialogOverlay>
-        <AlertDialogContent>
-          <AlertDialogHeader fontSize="lg" fontWeight="bold">
-            Delete Post
-          </AlertDialogHeader>
-          <AlertDialogBody>
-            Are you sure? You can't undo this action afterwards.
-          </AlertDialogBody>
-          <AlertDialogFooter>
-            <Button ref={cancelRef} onClick={onCloseDeleteAlert}>
-              No
-            </Button>
-            <Button colorScheme="red" onClick={deletePostConfirmed} ml={3}>
-              Yes
-            </Button>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialogOverlay>
-    </AlertDialog>
+
+      <Box w="15%" position="sticky" top="100px">
+      <Text fontWeight="bold" fontSize="lg" mb={4} textAlign="center">Suggested Countries</Text>
+      {randomCountries.map((country) => (
+        <Box
+          key={country.id}
+          mb={4}
+          cursor="pointer"
+          onClick={() => handleCountryClick(country.title)}
+          _hover={{ transform: "scale(1.05)" }}
+        >
+          <Image src={country.img} alt={country.title} borderRadius="md" objectFit="cover" />
+          <Text mt={2} fontWeight="bold" textAlign="center">{country.title}</Text>
+        </Box>
+
+      ))}
+    </Box>
+    <AlertDialog
+  isOpen={isDeleteAlertOpen}
+  leastDestructiveRef={cancelRef}
+  onClose={onCloseDeleteAlert}
+>
+  <AlertDialogOverlay>
+    <AlertDialogContent>
+      <AlertDialogHeader fontSize="lg" fontWeight="bold">
+        Delete Post
+      </AlertDialogHeader>
+      <AlertDialogBody>
+        Are you sure? You can't undo this action afterwards.
+      </AlertDialogBody>
+      <AlertDialogFooter>
+        <Button ref={cancelRef} onClick={onCloseDeleteAlert}>
+          No
+        </Button>
+        <Button colorScheme="red" onClick={deletePost} ml={3}>
+          Yes
+        </Button>
+      </AlertDialogFooter>
+    </AlertDialogContent>
+  </AlertDialogOverlay>
+</AlertDialog>
+
     </Flex>
   );
 }

@@ -16,7 +16,7 @@ router.post('/', async (req, res) => {
 // Get all bookmarks
 router.get('/', async (req, res) => {
   try {
-    const bookmarks = await Bookmark.find();
+    const bookmarks = await Bookmark.find().populate('postId');
     res.json(bookmarks);
   } catch (err) {
     res.status(500).json({ message: err.message });

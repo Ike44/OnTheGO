@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, ModalOverlay, ModalContent, ModalCloseButton, ModalBody, Box, Button, Image } from '@chakra-ui/react';
 import { CheckIcon, TimeIcon, AddIcon } from '@chakra-ui/icons';
+import { getPlaceSuggestions } from '../google/Google';
+import { List, ListItem } from '@chakra-ui/react';
+
 
 
 const MyPlanner = () => {
@@ -9,8 +12,7 @@ const MyPlanner = () => {
     const [completedTrips, setCompletedTrips] = useState([]);
     const [tripDetails, setTripDetails] = useState({
         title: '',
-        country: '',
-        location: '',
+        description: '', // Replaced country and location with description
         startDate: '',
         endDate: '',
         activities: [{ name: '', notes: '' }]
@@ -20,9 +22,11 @@ const MyPlanner = () => {
     const [isCompletedTrip, setIsCompletedTrip] = useState(false);
     const [isEditPopupOpen, setIsEditPopupOpen] = useState(false);
     const [activeTab, setActiveTab] = useState('plannedTrips');
+    const [errorMessage, setErrorMessage] = useState(''); // For error message
+    const [activitySuggestions, setActivitySuggestions] = useState([]); // State for activity suggestions
+
 
     const imageHeight = 350; // Image Height
-
 
     useEffect(() => {
         const storedTrips = localStorage.getItem('trips');
@@ -52,16 +56,55 @@ const MyPlanner = () => {
         }));
     };
 
-    const handleActivityChange = (index, field, value) => {
+    const handleActivityChange = async (index, field, value) => {
         setTripDetails(prev => {
             const updatedActivities = [...prev.activities];
-            updatedActivities[index][field] = value;
+            updatedActivities[index][field] = value; // Update the activity name in the state
             return { ...prev, activities: updatedActivities };
         });
+    
+        // Fetch suggestions for the "Activity Name"
+        if (field === 'name' && value.length > 1) {
+            try {
+                const suggestions = await getPlaceSuggestions(value); // API call to fetch suggestions
+                setActivitySuggestions(suggestions); // Store suggestions in the state
+            } catch (error) {
+                console.error('Error fetching activity suggestions:', error);
+                setActivitySuggestions([]); // Clear suggestions on error
+            }
+        } else {
+            setActivitySuggestions([]); // Clear suggestions if input is too short
+        }
     };
 
+    const handleSuggestionClick = (index, suggestion) => {
+        setTripDetails(prev => {
+            const updatedActivities = [...prev.activities];
+            updatedActivities[index].name = suggestion.description; // Set the selected suggestion as the activity name
+            return { ...prev, activities: updatedActivities };
+        });
+        setActivitySuggestions([]); // Clear the suggestion list
+    };
+    
+
+    
     const handleSubmit = (e) => {
         e.preventDefault();
+
+       
+        if (new Date(tripDetails.startDate) < new Date() || new Date(tripDetails.endDate) < new Date()) {
+            setErrorMessage('Start date and end date cannot be in the past');
+            return;
+        }
+       
+        // Check for valid date range
+        if (new Date(tripDetails.startDate) > new Date(tripDetails.endDate)) {
+            setErrorMessage('Start date cannot be later than end date');
+            return;
+        }
+
+        setErrorMessage(''); // Clear error if valid
+
         if (viewIndex === null) {
             setTrips([...trips, tripDetails]);
         } else {
@@ -69,22 +112,39 @@ const MyPlanner = () => {
             setTrips(updatedTrips);
             setViewIndex(null);
         }
-        setTripDetails({ title: '', country: '', location: '', startDate: '', endDate: '', activities: [{ name: '', notes: '' }] });
+        setTripDetails({ title: '', description: '', startDate: '', endDate: '', activities: [{ name: '', notes: '' }] });
         setIsModalOpen(false);
+
+        setActiveTab('plannedTrips');
     };
+
 
     const handleViewTrip = (index, isCompleted = false) => {
         const selectedTrip = isCompleted ? completedTrips[index] : trips[index];
+        if (!selectedTrip) {
+            console.error('Selected trip is undefined');
+            return;
+        }
         setTripDetails(selectedTrip);
         setViewIndex(index);
         setIsModalOpen(true);
         setIsCompletedTrip(isCompleted);
     };
+    
+    // const handleViewTrip = (index, isCompleted = false) => {
+    //     const selectedTrip = isCompleted ? completedTrips[index] : trips[index];
+    //     setTripDetails(selectedTrip);
+    //     setViewIndex(index);
+    //     setIsModalOpen(true);
+    //     setIsCompletedTrip(isCompleted);
+    // };
 
     const handleCloseModal = () => {
         setIsModalOpen(false);
         setViewIndex(null);
-        setTripDetails({ title: '', country: '', location: '', startDate: '', endDate: '', activities: [{ name: '', notes: '' }] });
+        setTripDetails({ title: '', description: '', startDate: '', endDate: '', activities: [{ name: '', notes: '' }] });
+
+        setActiveTab('plannedTrips');
     };
 
     const handleToggleTripStatus = () => {
@@ -103,7 +163,7 @@ const MyPlanner = () => {
 
     const handleOpenNewTripModal = () => {
         setIsModalOpen(true);
-        setTripDetails({ title: '', country: '', location: '', startDate: '', endDate: '', activities: [{ name: '', notes: '' }] });
+        setTripDetails({ title: '', description: '', startDate: '', endDate: '', activities: [{ name: '', notes: '' }] });
     };
 
     const handleDelete = () => {
@@ -115,14 +175,27 @@ const MyPlanner = () => {
             }
         }
         setViewIndex(null);
-        setTripDetails({ title: '', country: '', location: '', startDate: '', endDate: '', activities: [{ name: '', notes: '' }] });
+        setTripDetails({ title: '', description: '', startDate: '', endDate: '', activities: [{ name: '', notes: '' }] });
         setIsModalOpen(false);
     };
 
     const handleOpenEditPopup = () => { 
-        setIsEditPopupOpen(true); 
-        setTripDetails(trips[viewIndex]);
-    }; 
+        if (viewIndex !== null) {
+            const selectedTrip = isCompletedTrip ? completedTrips[viewIndex] : trips[viewIndex];
+            if (!selectedTrip) {
+                console.error('Selected trip is undefined');
+                return;
+            }
+            setTripDetails({ ...selectedTrip }); // Populate form with existing trip details
+            setIsEditPopupOpen(true); 
+        }
+    };
+    
+    
+    // const handleOpenEditPopup = () => { 
+    //     setIsEditPopupOpen(true); 
+    //     setTripDetails(trips[viewIndex]);
+    // }; 
 
     const handleCloseEditPopup = () => { 
         setIsEditPopupOpen(false); 
@@ -160,16 +233,13 @@ const MyPlanner = () => {
             <div style={styles.content}>
                 {activeTab === 'plannedTrips' && (
                     <div style={styles.listContainer}>
-                    <h2 style={{ 
-                        fontWeight: 700, fontSize: '40px', 
-                        color: 'black',
-                        textShadow: '4px 1px 2px grey' }}>Planned Trips</h2>
+                    <h2 style={{ fontWeight: 700, fontSize: '40px', color: 'black', textShadow: '4px 1px 2px grey' }}>Planned Trips</h2>
                         {trips.length === 0 ? (
                             <p>No trips planned.</p>
                         ) : (
                             trips.map((trip, index) => (
                                 <p key={index} style={styles.tripName} onClick={() => handleViewTrip(index)}>
-                                    {trip.country}
+                                    {trip.title}
                                 </p>
                             ))
                         )}
@@ -178,15 +248,13 @@ const MyPlanner = () => {
 
                 {activeTab === 'completedTrips' && (
                     <div style={styles.listContainer}>
-                        <h2 style={{ 
-                            fontWeight: 700, 
-                            fontSize: '40px', color: 'black', textShadow: '4px 1px 2px grey' }}>Completed Trips</h2>
+                        <h2 style={{ fontWeight: 700, fontSize: '40px', color: 'black', textShadow: '4px 1px 2px grey' }}>Completed Trips</h2>
                         {completedTrips.length === 0 ? (
                             <p>No trips completed.</p>
                         ) : (
                             completedTrips.map((trip, index) => (
                                 <p key={index} style={styles.tripName} onClick={() => handleViewTrip(index, true)}>
-                                    {trip.country}
+                                    {trip.title}
                                 </p>
                             ))
                         )}
@@ -214,7 +282,8 @@ const MyPlanner = () => {
                 <ModalContent maxW="600px" p={5}>
                     <ModalCloseButton />
                     <ModalBody>
-                        {viewIndex !== null ? (
+                    {viewIndex === null && <h3 style={styles.modalTitle}>New Trip</h3>}
+                    {viewIndex !== null ? (
                             <Box position="relative">
                                 <CheckIcon
                                     style={{
@@ -228,8 +297,7 @@ const MyPlanner = () => {
                                 />
                                 <h2 style={styles.tripViewHeader}>Trip View</h2>
                                 <p><strong>Title:</strong> {tripDetails.title}</p>
-                                <p><strong>Country:</strong> {tripDetails.country}</p>
-                                <p><strong>Location:</strong> {tripDetails.location}</p>
+                                <p><strong>Description:</strong> {tripDetails.description}</p> {/* Replaced country/location with description */}
                                 <p><strong>Dates:</strong> {tripDetails.startDate} - {tripDetails.endDate}</p>
                                 {tripDetails.activities.map((activity, i) => (
                                     <div key={i}>
@@ -255,63 +323,77 @@ const MyPlanner = () => {
                                 />
                                 <input
                                     type="text"
-                                    placeholder="Country"
-                                    value={tripDetails.country}
-                                    onChange={(e) => setTripDetails({ ...tripDetails, country: e.target.value })}
+                                    placeholder="Description"
+                                    value={tripDetails.description}
+                                    onChange={(e) => setTripDetails({ ...tripDetails, description: e.target.value })}
                                     required
                                     style={styles.input}
                                 />
-                                <input
-                                    type="text"
-                                    placeholder="Location"
-                                    value={tripDetails.location}
-                                    onChange={(e) => setTripDetails({ ...tripDetails, location: e.target.value })}
-                                    required
-                                    style={styles.input}
-                                />
-                                <input
-        type="date"
-        placeholder="Start Date"
-        value={tripDetails.startDate}
-        onChange={(e) => setTripDetails({ ...tripDetails, startDate: e.target.value })}
-        required
-        style={styles.input}
-    />
-    <input
-        type="date"
-        placeholder="End Date"
-        value={tripDetails.endDate}
-        onChange={(e) => setTripDetails({ ...tripDetails, endDate: e.target.value })}
-        required
-        style={styles.input}
-    />
+                                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                    <input
+                                        type="date"
+                                        placeholder="Start Date"
+                                        value={tripDetails.startDate}
+                                        onChange={(e) => setTripDetails({ ...tripDetails, startDate: e.target.value })}
+                                        required
+                                        style={styles.input}
+                                    />
+                                    <input
+                                        type="date"
+                                        placeholder="End Date"
+                                        value={tripDetails.endDate}
+                                        onChange={(e) => setTripDetails({ ...tripDetails, endDate: e.target.value })}
+                                        required
+                                        style={styles.input}
+                                    />
+                                </div>
 
-    <h4>Activities</h4>
-    {tripDetails.activities.map((activity, index) => (
-        <div key={index} style={{ marginBottom: '10px', display: 'flex', alignItems: 'flex-start', width: '100%' }}>
-            <input
-                type="text"
-                placeholder="Activity Name"
-                value={activity.name}
-                onChange={(e) => handleActivityChange(index, 'name', e.target.value)}
-                style={styles.input}
-            />
-            <textarea
-                placeholder="Notes"
-                value={activity.notes}
-                onChange={(e) => handleActivityChange(index, 'notes', e.target.value)}
-                style={styles.input}
-            />
-            {tripDetails.activities.length > 1 && (
-                <button type="button" onClick={() => handleRemoveActivity(index)} style={styles.removeButton}>
-                    Remove
-                </button>
-            )}
-        </div>
-    ))}
-    <button type="button" onClick={handleAddActivity} style={styles.addButton}>
-        Add Activity
-    </button>
+                                {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
+
+                                <h4>Activities</h4>
+                                {tripDetails.activities.map((activity, index) => (
+    <div key={index} style={{ marginBottom: '10px', display: 'flex', alignItems: 'flex-start', width: '100%' }}>
+        <input
+            type="text"
+            placeholder="Activity Name"
+            value={activity.name}
+            onChange={(e) => handleActivityChange(index, 'name', e.target.value)}
+            style={styles.input}
+        />
+        {/* Render suggestions list below the Activity Name input */}
+        {activitySuggestions.length > 0 && (
+            <List style={{ position: 'absolute', zIndex: 10, backgroundColor: 'white', border: '1px solid #ddd', width: '100%' }}>
+                {activitySuggestions.map((suggestion, i) => (
+                    <ListItem
+                        key={i}
+                        onClick={() => handleSuggestionClick(index, suggestion)}
+                        style={{ padding: '5px', cursor: 'pointer', borderBottom: '1px solid #eee' }}
+                    >
+                        {suggestion.description}
+                    </ListItem>
+                ))}
+            </List>
+        )}
+        <textarea
+            placeholder="Notes"
+            value={activity.notes}
+            onChange={(e) => handleActivityChange(index, 'notes', e.target.value)}
+            style={styles.input}
+        />
+        {tripDetails.activities.length > 1 && (
+            <button type="button" onClick={() => handleRemoveActivity(index)} style={styles.removeButton}>
+                Remove
+            </button>
+        )}
+    </div>
+))}
+                                 <button
+                        type="button"
+                        onClick={handleAddActivity}
+                        style={styles.addButton}
+                    >
+                        Add Activity
+                    </button>
 
                                 {/* ... */}
                                 <Button type="submit">Save Trip</Button>
@@ -329,7 +411,7 @@ const MyPlanner = () => {
             <ModalBody>
                 <h2 style={styles.tripViewHeader}>Edit Trip</h2>
                 <form onSubmit={handleEditSubmit} style={styles.form}>
-                    {/* Add the same fields as the trip form for editing */}
+                    {/* Form Fields */}
                     <input
                         type="text"
                         placeholder="Title"
@@ -340,40 +422,43 @@ const MyPlanner = () => {
                     />
                     <input
                         type="text"
-                        placeholder="Country"
-                        value={tripDetails.country}
-                        onChange={(e) => setTripDetails({ ...tripDetails, country: e.target.value })}
+                        placeholder="Description"
+                        value={tripDetails.description}
+                        onChange={(e) => setTripDetails({ ...tripDetails, description: e.target.value })}
                         required
                         style={styles.input}
                     />
-                    <input
-                        type="text"
-                        placeholder="Location"
-                        value={tripDetails.location}
-                        onChange={(e) => setTripDetails({ ...tripDetails, location: e.target.value })}
-                        required
-                        style={styles.input}
-                    />
-                    <input
-                        type="date"
-                        placeholder="Start Date"
-                        value={tripDetails.startDate}
-                        onChange={(e) => setTripDetails({ ...tripDetails, startDate: e.target.value })}
-                        required
-                        style={styles.input}
-                    />
-                    <input
-                        type="date"
-                        placeholder="End Date"
-                        value={tripDetails.endDate}
-                        onChange={(e) => setTripDetails({ ...tripDetails, endDate: e.target.value })}
-                        required
-                        style={styles.input}
-                    />
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <input
+                            type="date"
+                            placeholder="Start Date"
+                            value={tripDetails.startDate}
+                            onChange={(e) => setTripDetails({ ...tripDetails, startDate: e.target.value })}
+                            required
+                            style={styles.input}
+                        />
+                        <input
+                            type="date"
+                            placeholder="End Date"
+                            value={tripDetails.endDate}
+                            onChange={(e) => setTripDetails({ ...tripDetails, endDate: e.target.value })}
+                            required
+                            style={styles.input}
+                        />
+                    </div>
 
+                    {/* Activities Section */}
                     <h4>Activities</h4>
                     {tripDetails.activities.map((activity, index) => (
-                        <div key={index} style={{ marginBottom: '10px', display: 'flex', alignItems: 'flex-start', width: '100%' }}>
+                        <div
+                            key={index}
+                            style={{
+                                marginBottom: '10px',
+                                display: 'flex',
+                                alignItems: 'flex-start',
+                                width: '100%',
+                            }}
+                        >
                             <input
                                 type="text"
                                 placeholder="Activity Name"
@@ -381,6 +466,32 @@ const MyPlanner = () => {
                                 onChange={(e) => handleActivityChange(index, 'name', e.target.value)}
                                 style={styles.input}
                             />
+                            {/* Render suggestions list below the Activity Name input */}
+                            {activitySuggestions.length > 0 && (
+                                <List
+                                    style={{
+                                        position: 'absolute',
+                                        zIndex: 10,
+                                        backgroundColor: 'white',
+                                        border: '1px solid #ddd',
+                                        width: '100%',
+                                    }}
+                                >
+                                    {activitySuggestions.map((suggestion, i) => (
+                                        <ListItem
+                                            key={i}
+                                            onClick={() => handleSuggestionClick(index, suggestion)}
+                                            style={{
+                                                padding: '5px',
+                                                cursor: 'pointer',
+                                                borderBottom: '1px solid #eee',
+                                            }}
+                                        >
+                                            {suggestion.description}
+                                        </ListItem>
+                                    ))}
+                                </List>
+                            )}
                             <textarea
                                 placeholder="Notes"
                                 value={activity.notes}
@@ -388,22 +499,30 @@ const MyPlanner = () => {
                                 style={styles.input}
                             />
                             {tripDetails.activities.length > 1 && (
-                                <button type="button" onClick={() => handleRemoveActivity(index)} style={styles.removeButton}>
+                                <button
+                                    type="button"
+                                    onClick={() => handleRemoveActivity(index)}
+                                    style={styles.removeButton}
+                                >
                                     Remove
                                 </button>
                             )}
                         </div>
                     ))}
-                    <button type="button" onClick={handleAddActivity} style={styles.addButton}>
+                    <button
+                        type="button"
+                        onClick={handleAddActivity}
+                        style={styles.addButton}
+                    >
                         Add Activity
                     </button>
-
                     <Button type="submit">Update Trip</Button>
-                            </form>
-                        </ModalBody>
-                    </ModalContent>
-                </Modal>
-            )}
+                </form>
+            </ModalBody>
+        </ModalContent>
+    </Modal>
+)}
+
         </div>
     );
 };
@@ -417,20 +536,20 @@ const styles = {
     },
     sidebarContainer: {
         display: 'flex',
-        flexDirection: 'row', 
+        flexDirection: 'row',
         width: '100%',
     },
     sidebar: {
-        marginTop:'70px', 
+        marginTop: '70px',
         width: '20%',
-        minWidth: '200px', 
+        minWidth: '200px',
         background: 'rgba(179, 179, 179, 0.8)',
         padding: '10px',
         boxShadow: '2px 0 5px rgba(0,0,0,0.1)',
         cursor: 'pointer',
         textAlign: 'center',
         minHeight: 'calc(100vh - 70px)',
-        overflowY: 'auto', 
+        overflowY: 'auto',
     },
     sidebarTitle: {
         fontSize: '18px',
@@ -443,7 +562,7 @@ const styles = {
         marginBottom: '15px',
     },
     content: {
-        marginTop:'70px', 
+        marginTop: '70px',
         flex: 1,
         padding: '20px',
         overflowY: 'auto',
@@ -456,14 +575,6 @@ const styles = {
         padding: '5px 0',
         fontSize: '30px',
     },
-    // newTripButton: {
-    //     // background: '#4caf50',
-    //     color: 'white',
-    //     padding: '8px',
-    //     textAlign: 'center',
-    //     cursor: 'pointer',
-    //     marginTop: '10px',
-    // },
     form: {
         display: 'flex',
         flexDirection: 'column',
@@ -493,16 +604,16 @@ const styles = {
     },
     tripViewHeader: {
         textAlign: 'center',
-        fontSize: '28px', 
+        fontSize: '28px',
         fontWeight: 'bold',
-         marginBottom: '12px'
+        marginBottom: '12px',
     },
     mainContent: {
         flex: 1,
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-    }
+    },
 };
 
 export default MyPlanner;

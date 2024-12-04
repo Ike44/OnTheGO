@@ -16,8 +16,10 @@ function App() {
         <ChatBot />
       </Box>
       {/* </Layout> */}
-      <Footer />
-    </div>
+      <Box as="footer" position="fixed" bottom="0" width="100%" >
+        <Footer />
+      </Box>
+      </div>
   );
 }
 
