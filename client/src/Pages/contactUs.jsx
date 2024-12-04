@@ -51,7 +51,7 @@ function ContactUs() {
   };
 
   return (
-    <Box w="85%" m="auto" p="200px">
+    <Box w="35%" m="auto" mt="100px">
       <Text fontSize="2xl" mb="10px">Contact Us</Text>
       <form onSubmit={handleSubmit}>
         <Input
@@ -72,6 +72,7 @@ function ContactUs() {
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           mb="10px"
+          h="160px"
         />
         <Button type="submit" colorScheme="gray" width="100%">
           Submit
