@@ -8,6 +8,7 @@ function Signin() {
     const { isOpen: isRegisterOpen, onOpen: onRegisterOpen, onClose: onRegisterClose } = useDisclosure();
   
     const [isModalShown, setIsModalShown] = useState(false); 
+    const [emailError, setEmailError] = useState('');
 
     const initialRef = React.useRef(null);
     const finalRef = React.useRef(null);
@@ -23,8 +24,20 @@ function Signin() {
         }
     }, [isModalShown, onOpen]);
 
+    const validateEmail = (email) => {
+        const re = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        return re.test(email);
+    };
+
     function handleSignInSubmit() {
+        if (!validateEmail(signInData.email)) {
+            setEmailError('Please enter a valid email address');
+            return;
+        }
+        
         if (signInData.email && signInData.password) {
+            // Store email in session storage
+            sessionStorage.setItem('userEmail', signInData.email);
             alert("Successfully Logged in");
             onClose(); 
             setIsModalShown(true);  
@@ -50,6 +63,16 @@ function Signin() {
         }
     }
 
+    const handleEmailChange = (e) => {
+        const email = e.target.value;
+        setSignInData({ ...signInData, email });
+        if (email && !validateEmail(email)) {
+            setEmailError('Please enter a valid email address');
+        } else {
+            setEmailError('');
+        }
+    };
+
     return (
         <>
             {/* Sign in Modal */}
@@ -68,16 +91,21 @@ function Signin() {
                     <ModalBody pb={6} p="10px 60px">
                         <Text fontSize="3xl" color="black" mb="20px" fontWeight="500">Welcome.</Text>
 
-                        <FormControl>
-                            <FormLabel fontWeight="600" fontSize="md">Email address</FormLabel>
+                        <FormControl isInvalid={!!emailError}>
+                            <FormLabel fontWeight="600" fontSize="md">Email</FormLabel>
                             <Input
                                 outline="none"
                                 ref={initialRef}
                                 placeholder='Email'
                                 type="email"
                                 value={signInData.email}
-                                onChange={(e) => setSignInData({ ...signInData, email: e.target.value })}
+                                onChange={handleEmailChange}
                             />
+                            {emailError && (
+                                <Text color="red.500" fontSize="sm" mt={1}>
+                                    {emailError}
+                                </Text>
+                            )}
                         </FormControl>
 
                         <FormControl mt={3}>
@@ -118,16 +146,11 @@ function Signin() {
                                 borderRadius="3xl" 
                                 color="white" 
                                 fontSize='md'
+                                isDisabled={!!emailError}
                             >
                                 SIGN IN
                             </Button>
                         </FormControl>
-
-                        <Box w="97%" m="auto" mt="25px" display="flex" gap="8px" alignItems="center">
-                            <Divider></Divider>
-                            <Text w="100%" fontSize="md">or</Text>
-                            <Divider></Divider>
-                        </Box>
 
                         <GoogleSignin onSignInSuccess={handleGoogleSignInSuccess} />
 
@@ -151,9 +174,6 @@ function Signin() {
 
                         <Text mt="25px" textAlign="center" fontSize="xs">
                             By proceeding, you agree to our <Text as="span" textDecoration="underline">Terms of Use</Text> and confirm you have read our <Text as="span" textDecoration="underline">Privacy and Cookie Statement</Text>.
-                        </Text>
-                        <Text mt="15px" textAlign="center" mb="20px" fontSize="xs">
-                            This site is protected by reCAPTCHA and the Google <Text as="span" textDecoration="underline">Privacy Policy</Text> and <Text as="span" textDecoration="underline">Terms of Service</Text> apply.
                         </Text>
                     </ModalBody>
                 </ModalContent>
