@@ -3,12 +3,16 @@ import { Box, Image, VStack, Text, Heading, Button, useDisclosure, Grid } from '
 import { Modal, ModalOverlay, ModalContent, ModalBody, ModalCloseButton } from '@chakra-ui/react';
 import { MdBookmark } from 'react-icons/md';
 
+import axios from 'axios';
+
+
 
 
 function Bookmarks() {
     const [bookmarkedPosts, setBookmarkedPosts] = useState([]);
     const [selectedPost, setSelectedPost] = useState(null);
     const { isOpen, onOpen, onClose } = useDisclosure();
+    
 
     useEffect(() => {
         const storedBookmarks = localStorage.getItem("bookmarkedPosts");
@@ -17,6 +21,7 @@ function Bookmarks() {
         }
     }, []);
 
+    
     const handleDeleteBookmark = (indexToRemove) => {
         const updatedBookmarks = bookmarkedPosts.filter((_, index) => index !== indexToRemove);
         setBookmarkedPosts(updatedBookmarks);
@@ -27,6 +32,18 @@ function Bookmarks() {
         setSelectedPost(post);
         onOpen();
     };
+
+    const handleAddBookmark = async (post) => {
+        try {
+            const response = await axios.post('http://localhost:3001/api/bookmarks', {
+                postId: post._id,
+            });
+            setBookmarkedPosts((prev) => [...prev, response.data.postId]);
+        } catch (error) {
+            console.error('Error adding bookmark:', error);
+        }
+    };
+    
 
     return (
         <Box w="85%" m="auto" pt="15px" textAlign="center" mt="40px">
@@ -58,6 +75,7 @@ function Bookmarks() {
                                     handleDeleteBookmark(index);
                                 }}
                             />
+
 
                         </Box>
                     ))
