@@ -130,7 +130,6 @@ function CreatePost() {
     e.preventDefault();
   
     try {
-      // Initialize image ID
       let imageId = '';
       if (image) {
         try {
@@ -316,7 +315,7 @@ function CreatePost() {
             <Textarea value={body} onChange={(e) => setBody(e.target.value)} />
           </FormControl>
 
-          <FormControl>
+          <FormControl isRequired>
             <FormLabel>Upload Image</FormLabel>
             <Input type="file" onChange={handleImageChange} />
             {uploadProgress > 0 && uploadProgress < 100 && (

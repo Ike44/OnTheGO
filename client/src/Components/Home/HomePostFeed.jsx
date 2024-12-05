@@ -164,30 +164,32 @@ const Post = ({ post }) => {
     setVotes(post.upvotes - post.downvotes);
   }, [post.upvotes, post.downvotes]);
 
-
-  const handleVote = async (direction) => {
-    const isUpvote = direction === 'upvote';
-    let newVoteStatus;
-
-    if (isUpvote) {
-      newVoteStatus = userVote === 1 ? 0 : 1;
+  const handleUpvote = () => {
+    if (userVote === 1) {
+      setVotes(votes - 1);
+      setUserVote(0);
+    } else if (userVote === -1) {
+      setVotes(votes + 2);
+      setUserVote(1);
     } else {
-      newVoteStatus = userVote === -1 ? 0 : -1;
-    }
-
-    let voteDiff = newVoteStatus - userVote;
-
-    try {
-      const response = await axios.post(`http://localhost:3001/api/posts/${post._id}/${direction}`, { voteDiff });
-      if (response.status === 200) {
-        // Update local state with new votes and vote status
-        setVotes(votes + voteDiff);
-        setUserVote(newVoteStatus);
-      }
-    } catch (error) {
-      console.error(`Error when trying to ${direction} the post:`, error);
+      setVotes(votes + 1);
+      setUserVote(1);
     }
   };
+
+  const handleDownvote = () => {
+    if (userVote === -1) {
+      setVotes(votes + 1);
+      setUserVote(0);
+    } else if (userVote === 1) {
+      setVotes(votes - 2);
+      setUserVote(-1);
+    } else {
+      setVotes(votes - 1);
+      setUserVote(-1);
+    }
+  };
+
 
 
   const handleBookmark = (e) => {
@@ -223,20 +225,20 @@ const Post = ({ post }) => {
       <VStack spacing={4} align="start">
         <HStack spacing={4} align="start" w="100%">
           <VStack spacing={2} align="center">
+            userVote === -1 ? 'red' : 'gray'
             <IconButton
               icon={<ArrowUpIcon />}
               aria-label="Upvote"
-              onClick={(e) => { e.stopPropagation(); handleVote('upvote'); }}
+              onClick={(e) => { e.stopPropagation(); handleUpvote(); }}
               colorScheme={userVote === 1 ? 'green' : 'gray'}
             />
             <Text>{votes}</Text>
             <IconButton
               icon={<ArrowDownIcon />}
               aria-label="Downvote"
-              onClick={(e) => { e.stopPropagation(); handleVote('downvote'); }}
+              onClick={(e) => { e.stopPropagation(); handleDownvote(); }}
               colorScheme={userVote === -1 ? 'red' : 'gray'}
             />
-
           </VStack>
           <Link to={`/view-post/${post._id}`} style={{ textDecoration: 'none', width: '100%' }}>
             <HStack align="start" spacing={4} flex="1">

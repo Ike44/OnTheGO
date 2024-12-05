@@ -51,7 +51,7 @@ function ContactUs() {
   };
 
   return (
-    <Box w="35%" m="auto" mt="100px">
+    <Box w="35%" m="auto" mt="100px" mb="235px">
       <Text fontSize="2xl" mb="10px">Contact Us</Text>
       <form onSubmit={handleSubmit}>
         <Input

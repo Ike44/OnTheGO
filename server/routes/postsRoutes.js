@@ -64,33 +64,4 @@ router.put('/:id', async (req, res) => {
 });
 
 
-
-router.post('/:id/vote', async (req, res) => {
-  const { userId, voteDiff } = req.body; // Assuming you send the user ID and the vote difference (-1, 0, 1)
-
-  try {
-    const post = await Post.findById(req.params.id);
-    if (!post) return res.status(404).send('Post not found');
-
-    const voteIndex = post.votes.findIndex(vote => vote.user.toString() === userId);
-    if (voteIndex !== -1) {
-      post.votes[voteIndex].value += voteDiff;
-      // Correct possible out of range values
-      post.votes[voteIndex].value = Math.max(-1, Math.min(1, post.votes[voteIndex].value));
-    } else {
-      // Add new voter
-      post.votes.push({ user: userId, value: voteDiff });
-    }
-
-    post.upvotes = post.votes.filter(vote => vote.value === 1).length;
-    post.downvotes = post.votes.filter(vote => vote.value === -1).length;
-
-    await post.save();
-    res.json({ upvotes: post.upvotes, downvotes: post.downvotes });
-  } catch (error) {
-    console.error('Failed to vote on post:', error);
-    res.status(500).send('Server error');
-  }
-});
-
 module.exports = router;
