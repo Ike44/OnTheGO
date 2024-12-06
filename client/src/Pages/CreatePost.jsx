@@ -283,7 +283,6 @@ function CreatePost() {
               <option value="Mountains">Mountains</option>
               <option value="Restaurant">Restaurant</option>
               <option value="Transportation">Transportation</option>
-              <option value="Landmarks">Landmarks</option>
 
             </Select>
           </FormControl>
