@@ -208,13 +208,13 @@ function SubNav({ onApplyFilters, hcFilter }) {
                     <Portal>
                         <MenuList w="125%">
                             <MenuItem>
-                                <Checkbox isChecked={category.includes("Hidden gems")} onChange={() => toggleSelection(category, setCategory, "Hidden gems")}>
-                                    Hidden gems
+                                <Checkbox isChecked={category.includes("Beaches")} onChange={() => toggleSelection(category, setCategory, "Beaches")}>
+                                    Beaches
                                 </Checkbox>
                             </MenuItem>
                             <MenuItem>
-                                <Checkbox isChecked={category.includes("Restaurants")} onChange={() => toggleSelection(category, setCategory, "Restaurants")}>
-                                    Restaurants
+                                <Checkbox isChecked={category.includes("Hidden gems")} onChange={() => toggleSelection(category, setCategory, "Hidden gems")}>
+                                    Hidden gems
                                 </Checkbox>
                             </MenuItem>
                             <MenuItem>
@@ -228,9 +228,14 @@ function SubNav({ onApplyFilters, hcFilter }) {
                                 </Checkbox>
                             </MenuItem>
                             <MenuItem>
-                                <Checkbox isChecked={category.includes("Beaches")} onChange={() => toggleSelection(category, setCategory, "Beaches")}>
-                                    Beaches
+                                <Checkbox isChecked={category.includes("Restaurants")} onChange={() => toggleSelection(category, setCategory, "Restaurants")}>
+                                    Restaurants
                                 </Checkbox>
+                                </MenuItem>
+                                <MenuItem>
+                            <Checkbox isChecked={category.includes("Transportation")} onChange={() => toggleSelection(category, setCategory, "Transportation")}>
+                                Transportation
+                            </Checkbox>                            
                             </MenuItem>
                         </MenuList>
                     </Portal>
