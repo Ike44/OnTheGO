@@ -3,7 +3,7 @@ import { Box, Button, Divider, FormControl, FormLabel, Input, Modal, ModalBody, 
 import React, { useEffect, useState } from "react";
 import GoogleSignin from './GoogleSignin';
 
-function Signin() {
+function Signin({ onSignInSuccess }) {
     const { isOpen, onOpen, onClose } = useDisclosure();
     const { isOpen: isRegisterOpen, onOpen: onRegisterOpen, onClose: onRegisterClose } = useDisclosure();
   
@@ -40,7 +40,10 @@ function Signin() {
             sessionStorage.setItem('userEmail', signInData.email);
             alert("Successfully Logged in");
             onClose(); 
-            setIsModalShown(true);  
+            setIsModalShown(true);
+            if (onSignInSuccess) {
+                onSignInSuccess();
+            }
         } else {
             alert("Please fill out all fields");
         }
@@ -50,6 +53,9 @@ function Signin() {
         alert("Successfully Logged in with Google");
         onClose();
         setIsModalShown(true);
+        if (onSignInSuccess) {
+            onSignInSuccess();
+        }
     }
 
     function handleRegisterSubmit() {
@@ -57,7 +63,10 @@ function Signin() {
             alert("Successfully Registered");
             onRegisterClose();  
             onClose();  
-            setIsModalShown(true);  
+            setIsModalShown(true);
+            if (onSignInSuccess) {
+                onSignInSuccess();
+            }
         } else {
             alert("Please fill out all fields");
         }
@@ -71,6 +80,11 @@ function Signin() {
         } else {
             setEmailError('');
         }
+    };
+
+    const handleReturnToSignIn = () => {
+        onRegisterClose();
+        setIsModalShown(false);
     };
 
     return (
@@ -242,6 +256,16 @@ function Signin() {
                                     >
                                         Join
                                     </Button>
+                                    <Button
+                                        onClick={handleReturnToSignIn}
+                                        mt={4}
+                                        variant="outline"
+                                        width="full"
+                                        borderColor="black"
+                                        _hover={{ bg: 'gray.100' }}
+                                    >
+                                        Back to Sign In
+                                    </Button>
                                 </TabPanel>
                                 <TabPanel>
                                     <FormControl>
@@ -289,6 +313,16 @@ function Signin() {
                                         width="full"
                                     >
                                         Join
+                                    </Button>
+                                    <Button
+                                        onClick={handleReturnToSignIn}
+                                        mt={4}
+                                        variant="outline"
+                                        width="full"
+                                        borderColor="black"
+                                        _hover={{ bg: 'gray.100' }}
+                                    >
+                                        Return to Sign In
                                     </Button>
                                 </TabPanel>
                             </TabPanels>
