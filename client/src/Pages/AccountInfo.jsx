@@ -2,10 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { Box, VStack, Text, Button, Avatar, Heading, useToast, Flex } from '@chakra-ui/react';
 import { getGoogleUserData, signOut } from '../google/Google';
 import { useNavigate } from 'react-router-dom';
+import Signin from '../Components/Signin';
 
 function AccountInfo() {
     const [userData, setUserData] = useState(null);
     const [sessionEmail, setSessionEmail] = useState(null);
+    const [showSignIn, setShowSignIn] = useState(false);
+    const [signInTrigger, setSignInTrigger] = useState(0);
     const navigate = useNavigate();
     const toast = useToast();
 
@@ -14,6 +17,7 @@ function AccountInfo() {
         const googleData = getGoogleUserData();
         if (googleData) {
             setUserData(googleData);
+            setShowSignIn(false);
             return;
         }
 
@@ -21,8 +25,13 @@ function AccountInfo() {
         const email = sessionStorage.getItem('userEmail');
         if (email) {
             setSessionEmail(email);
+            setShowSignIn(false);
         }
-    }, []);
+    }, [signInTrigger]); // Re-run when signInTrigger changes
+
+    const handleSignInSuccess = () => {
+        setSignInTrigger(prev => prev + 1); // Trigger useEffect to re-check user data
+    };
 
     const handleSignOut = async () => {
         try {
@@ -33,6 +42,10 @@ function AccountInfo() {
                 // Clear session storage for regular sign out
                 sessionStorage.removeItem('userEmail');
             }
+            
+            // Reset states
+            setUserData(null);
+            setSessionEmail(null);
             
             toast({
                 title: 'Signed out successfully',
@@ -74,9 +87,19 @@ function AccountInfo() {
                     <Heading size="lg" mb={4} color="gray.600">
                         No Account Info Available
                     </Heading>
-                    <Text fontSize="md" color="gray.500">
+                    <Text fontSize="md" color="gray.500" mb={6}>
                         You have to be signed in to view your account information
                     </Text>
+                    <Button
+                        bg="black"
+                        color="white"
+                        size="lg"
+                        _hover={{ bg: 'gray.800' }}
+                        onClick={() => setShowSignIn(true)}
+                    >
+                        Sign In
+                    </Button>
+                    {showSignIn && <Signin onSignInSuccess={handleSignInSuccess} />}
                 </Box>
             </Flex>
         );
