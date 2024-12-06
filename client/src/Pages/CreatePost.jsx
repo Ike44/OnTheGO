@@ -283,11 +283,8 @@ function CreatePost() {
               <option value="Mountains">Mountains</option>
               <option value="Restaurant">Restaurant</option>
               <option value="Transportation">Transportation</option>
-<<<<<<< Updated upstream
               <option value="Landmarks">Landmarks</option>
-=======
 
->>>>>>> Stashed changes
             </Select>
           </FormControl>
 
