@@ -79,6 +79,19 @@ function ViewPost() {
     fetchPosts();
   }, []);
 
+  
+  useEffect(() => {
+    const fetchComments = async () => {
+      try {
+        const response = await axios.get(`http://localhost:3001/api/comments/${postId}`);
+        setComments(response.data);
+      } catch (error) {
+        console.error("Error fetching comments:", error);
+      }
+    };
+
+    fetchComments();
+  }, [postId]);  
 
   const deletePost = async () => {
     try {
