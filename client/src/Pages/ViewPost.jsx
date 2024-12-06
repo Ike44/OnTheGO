@@ -1,9 +1,15 @@
 import {
+  AlertDialog,
+  AlertDialogBody,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogContent,
+  AlertDialogOverlay,
   Box, Button, Center, Flex, HStack, Image, Text, VStack, Divider, Textarea, Avatar,
   Menu, MenuButton, MenuItem, MenuList, IconButton
 } from '@chakra-ui/react';
 import { FaCommentDots, FaStar, FaEllipsisV } from 'react-icons/fa';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
@@ -12,6 +18,13 @@ function ViewPost() {
   const [post, setPost] = useState(null);
   const [imageUrl, setImageUrl] = useState(null);
   const navigate = useNavigate();
+  const [comments, setComments] = useState([]);
+  const [newComment, setNewComment] = useState('');
+  const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
+  const cancelRef = useRef();
+  const onOpenDeleteAlert = () => setIsDeleteAlertOpen(true);
+  const onCloseDeleteAlert = () => setIsDeleteAlertOpen(false);
+
   const [randomCountries, setRandomCountries] = useState([]);
   const [suggestedPosts, setSuggestedPosts] = useState([]);
 
@@ -54,7 +67,7 @@ function ViewPost() {
       try {
         const response = await axios.get('http://localhost:3001/api/posts'); // Adjust API endpoint as necessary
         const allPosts = response.data;
-  
+
         // Shuffle and select 3-5 random posts
         const shuffledPosts = allPosts.sort(() => 0.5 - Math.random());
         setSuggestedPosts(shuffledPosts.slice(0, 10));
@@ -62,23 +75,28 @@ function ViewPost() {
         console.error("Error fetching posts:", error);
       }
     };
-  
+
     fetchPosts();
   }, []);
-  
+
 
   const deletePost = async () => {
     try {
       const response = await axios.delete(`http://localhost:3001/api/posts/${post._id}`);
       if (response.status === 200) {
         alert('Post deleted successfully');
-        navigate('/'); // Redirect to the list of posts or a suitable route
+        navigate('/');
       }
     } catch (error) {
       console.error('Failed to delete the post:', error);
       alert('Failed to delete the post');
     }
+    onCloseDeleteAlert();  // Close the alert dialog after handling delete
   };
+
+  if (!post) {
+    return <Center>Loading...</Center>;
+  }
 
   const editPost = () => {
     navigate(`/edit-post/${postId}`, { state: { post } });
@@ -98,24 +116,37 @@ function ViewPost() {
     ));
   };
 
+  const submitComment = async (commentContent) => {
+    if (!commentContent.trim()) return;  // Guard clause for empty content
+    try {
+      const commentData = { author: "User", content: commentContent };
+      const response = await axios.post(`http://localhost:3001/api/comments/${postId}`, commentData);
+      setComments([...comments, { ...commentData, createdAt: new Date().toISOString() }]); // Assuming you want to mimic the structure including `createdAt`
+      setNewComment('');
+      alert('Comment added successfully');
+    } catch (error) {
+      console.error("Error adding comment:", error);
+      alert('Failed to add comment');
+    }
+  };
+
+
   return (
     <Flex direction="row" pt="95px" align="flex-start" justify="center" gap={10}>
-
-<Box w="20%" position="sticky" top="100px">
-  <Text fontWeight="bold" fontSize="lg" mb={4} textAlign="center">Suggested Posts</Text>
-  {suggestedPosts.map((post) => (
-    <Box
-      key={post._id}
-      mb={10}
-      cursor="pointer"
-      onClick={() => navigate(`/view-post/${post._id}`)}
-      _hover={{ textDecoration: "underline", color: "blue.500" }}
-    >
-      <Text textAlign="center">{post.title}</Text>
-    </Box>
-  ))}
-</Box>
-
+      <Box w="20%" position="sticky" top="100px">
+        <Text fontWeight="bold" fontSize="lg" mb={4} textAlign="center">Suggested Posts</Text>
+        {suggestedPosts.map((post) => (
+          <Box
+            key={post._id}
+            mb={10}
+            cursor="pointer"
+            onClick={() => navigate(`/view-post/${post._id}`)}
+            _hover={{ textDecoration: "underline", color: "blue.500" }}
+          >
+            <Text textAlign="center">{post.title}</Text>
+          </Box>
+        ))}
+      </Box>
       <Box maxW="50rem" w="70%" borderWidth="1px" borderRadius="lg" overflow="hidden" boxShadow="lg" bg="white" mb={20} position="relative">
         <Menu>
           <MenuButton
@@ -130,7 +161,7 @@ function ViewPost() {
           />
           <MenuList>
             <MenuItem onClick={editPost}>Edit</MenuItem>
-            <MenuItem onClick={deletePost}>Delete</MenuItem>
+            <MenuItem onClick={onOpenDeleteAlert}>Delete</MenuItem>
           </MenuList>
         </Menu>
         <Box p={5}>
@@ -161,49 +192,70 @@ function ViewPost() {
           <Text textAlign="left" mt={10}>{post.body}</Text>
         </Box>
         <Divider my={2} />
-        <Flex justify="left" align="center" p={2}>
-          <Button leftIcon={<FaCommentDots />} variant="ghost">Comment</Button>
+        <Flex justify="space-between" align="center" p={2}>
+          <Text pl={4} fontSize="lg" fontWeight="bold">Comments</Text>
         </Flex>
-        <Box px={5} pb={5}>
-          <Textarea placeholder="Write a comment..." mb={4} />
-          <VStack spacing={4} pt={4} align="stretch">
-            {/* Example comments */}
-            <HStack align="start" spacing={4}>
+        <Divider my={2} mt={2} />
+        <Flex justify="left" align="center" p={2}>
+          <HStack width="full">
+            <Textarea placeholder="Write a comment..." value={newComment} onChange={e => setNewComment(e.target.value)} />
+            <Button onClick={() => submitComment(newComment)} mt={10} colorScheme="blue">Add</Button>
+          </HStack>
+        </Flex>
+        <VStack spacing={4} align="stretch" p={5}>
+          {comments.map((comment, index) => (
+            <HStack key={index} spacing={3} align="start">
               <Avatar size="sm" src="https://via.placeholder.com/150" />
-              <VStack align="start">
-                <Text fontWeight="bold">John Smith</Text>
-                <Text>Really insightful post, thanks for sharing!</Text>
-                <Button variant="link" size="sm">Reply</Button>
+              <VStack align="start" spacing={0}>
+                <Text fontWeight="bold">{comment.author || "User"}</Text>
+                <Text color="gray.500" fontSize="sm">{new Date(comment.createdAt).toLocaleDateString()}</Text>
+                <Text>{comment.content}</Text>
               </VStack>
             </HStack>
-            <HStack align="start" spacing={4}>
-              <Avatar size="sm" src="https://via.placeholder.com/150" />
-              <VStack align="start">
-                <Text fontWeight="bold">Emily R.</Text>
-                <Text>Loved the detail on the photos, looking forward to more posts like this.</Text>
-                <Button variant="link" size="sm">Reply</Button>
-              </VStack>
-            </HStack>
-          </VStack>
-        </Box>
+          ))}
+
+        </VStack>
       </Box>
-
       <Box w="15%" position="sticky" top="100px">
-      <Text fontWeight="bold" fontSize="lg" mb={4} textAlign="center">Suggested Countries</Text>
-      {randomCountries.map((country) => (
-        <Box
-          key={country.id}
-          mb={4}
-          cursor="pointer"
-          onClick={() => handleCountryClick(country.title)}
-          _hover={{ transform: "scale(1.05)" }}
-        >
-          <Image src={country.img} alt={country.title} borderRadius="md" objectFit="cover" />
-          <Text mt={2} fontWeight="bold" textAlign="center">{country.title}</Text>
-        </Box>
+        <Text fontWeight="bold" fontSize="lg" mb={4} textAlign="center">Suggested Countries</Text>
+        {randomCountries.map((country) => (
+          <Box
+            key={country.id}
+            mb={4}
+            cursor="pointer"
+            onClick={() => handleCountryClick(country.title)}
+            _hover={{ transform: "scale(1.05)" }}
+          >
+            <Image src={country.img} alt={country.title} borderRadius="md" objectFit="cover" />
+            <Text mt={2} fontWeight="bold" textAlign="center">{country.title}</Text>
+          </Box>
 
-      ))}
-    </Box>
+        ))}
+      </Box>
+      <AlertDialog
+        isOpen={isDeleteAlertOpen}
+        leastDestructiveRef={cancelRef}
+        onClose={onCloseDeleteAlert}
+      >
+        <AlertDialogOverlay>
+          <AlertDialogContent>
+            <AlertDialogHeader fontSize="lg" fontWeight="bold">
+              Delete Post
+            </AlertDialogHeader>
+            <AlertDialogBody>
+              Are you sure? You can't undo this action afterwards.
+            </AlertDialogBody>
+            <AlertDialogFooter>
+              <Button ref={cancelRef} onClick={onCloseDeleteAlert}>
+                No
+              </Button>
+              <Button colorScheme="red" onClick={deletePost} ml={3}>
+                Yes
+              </Button>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialogOverlay>
+      </AlertDialog>
     </Flex>
   );
 }

@@ -25,6 +25,8 @@ function AllRoutes(){
         <Route path="/view-post/:postId" element={<ViewPost />} />  
         <Route path="/countries" element={<HomeCountries />} />
         <Route path="/feed" element={<HomePostFeed />} />
+        <Route path="/edit-post/:postId" element={<CreatePost />} />
+
 
     </Routes>
 }

@@ -31,7 +31,9 @@ function CreatePost() {
   const post = routerLocation.state?.post;
   const { postId } = useParams();
 
+
   useEffect(() => {
+    console.log('Editing Post:', post);
     if (post) {
       setPostType(post.postType);
       setTitle(post.title);
@@ -44,6 +46,19 @@ function CreatePost() {
       setLocation(post.location);
     }
   }, [post]);
+
+  const deletePost = async () => {
+    try {
+      const response = await axios.delete(`http://localhost:3001/api/posts/${postId}`);
+      if (response.status === 200) {
+        alert('Post deleted successfully');
+        navigate('/');
+      }
+    } catch (error) {
+      console.error('Failed to delete the post:', error);
+      alert('Failed to delete the post');
+    }
+  };
 
   const handleInputChange = async (event) => {
     const value = event.target.value;
@@ -95,22 +110,56 @@ function CreatePost() {
           setUploadProgress(progress);
         }
       });
-      return response.data.imageId; // Return the uploaded image ID
+
+
+      return response.data.imageId; 
     } catch (error) {
       console.error('Error uploading image:', error);
+      toast({
+        title: 'Error Uploading Image.',
+        description: 'Please try again later.',
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
       throw new Error('Image upload failed');
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
     try {
       let imageId = '';
       if (image) {
-        imageId = await uploadImage();
+        try {
+          imageId = await uploadImage();
+        } catch (error) {
+          console.error('Error uploading image:', error);
+          toast({
+            title: 'Image Upload Failed',
+            description: 'An error occurred while uploading the image. Please try again.',
+            status: 'error',
+            duration: 5000,
+            isClosable: true,
+          });
+          return; // Stop submission if image upload fails
+        }
       }
-
+  
+      // Validate date range
+      if (fromDate && toDate && new Date(fromDate) > new Date(toDate)) {
+        toast({
+          title: 'Invalid Date Range',
+          description: 'The end date must be after the start date.',
+          status: 'error',
+          duration: 5000,
+          isClosable: true,
+        });
+        return;
+      }
+  
+      // Prepare post data
       const postData = {
         postType,
         title,
@@ -121,33 +170,51 @@ function CreatePost() {
         rating: postType === 'Personal' ? rating : undefined,
         fromDate: postType === 'Personal' ? fromDate : undefined,
         toDate: postType === 'Personal' ? toDate : undefined,
-        businessWebsite: postType === 'Business' ? businessWebsite : undefined
+        businessWebsite: postType === 'Business' ? businessWebsite : undefined,
       };
-
-      const url = postId ? `http://localhost:3001/api/posts/${postId}` : 'http://localhost:3001/api/posts';
+  
+      // Determine URL and HTTP method
+      const url = postId
+        ? `http://localhost:3001/api/posts/${postId}`
+        : 'http://localhost:3001/api/posts';
       const method = postId ? 'put' : 'post';
-      
-      const response = await axios[method](url, postData);
-      toast({
-        title: post ? 'Post Updated.' : 'Post Created.',
-        description: post ? "We've updated your post successfully." : "We've created your post successfully.",
-        status: 'success',
-        duration: 5000,
-        isClosable: true,
-      });
-      navigate(`/view-post/${response.data._id}`);
+  
+      // Submit the post data
+      try {
+        const response = await axios[method](url, postData);
+        toast({
+          title: postId ? 'Post Updated' : 'Post Created',
+          description: postId
+            ? "We've updated your post successfully."
+            : "We've created your post successfully.",
+          status: 'success',
+          duration: 5000,
+          isClosable: true,
+        });
+        navigate(`/view-post/${response.data._id}`);
+      } catch (error) {
+        console.error('Error saving post:', error);
+        toast({
+          title: 'Error Saving Post',
+          description: 'An error occurred while saving the post. Please try again.',
+          status: 'error',
+          duration: 5000,
+          isClosable: true,
+        });
+      }
     } catch (error) {
-      console.error('Error saving post:', error);
+      // Outer error handling for unexpected errors
+      console.error('Unexpected error during form submission:', error);
       toast({
-        title: 'Error Saving Post.',
-        description: error.message,
+        title: 'Form Submission Failed',
+        description: 'An unexpected error occurred. Please try again.',
         status: 'error',
         duration: 5000,
         isClosable: true,
       });
     }
   };
-
+  
   const renderStars = () => {
     return Array(5).fill("").map((_, index) => (
       <FaStar
@@ -171,7 +238,7 @@ function CreatePost() {
               <option value="Business">Business</option>
             </Select>
           </FormControl>
-          
+
           <FormControl isRequired>
             <FormLabel>Post Title</FormLabel>
             <Input type="text" value={title} onChange={(e) => setTitle(e.target.value)} />
@@ -214,20 +281,21 @@ function CreatePost() {
               <option value="Hidden gems">Hidden Gems</option>
               <option value="City">City</option>
               <option value="Transportation">Transportation</option>
+              <option value="Landmarks">Landmarks</option>
             </Select>
           </FormControl>
 
           {postType === 'Personal' && (
             <>
               <FormControl>
-                <FormLabel>Duration</FormLabel>
+                <FormLabel>Duration of your Trip</FormLabel>
                 <HStack spacing={4}>
                   <Input type="date" value={fromDate} onChange={(e) => setFromDate(e.target.value)} />
                   <Input type="date" value={toDate} onChange={(e) => setToDate(e.target.value)} />
                 </HStack>
               </FormControl>
               <FormControl>
-                <FormLabel>Rating</FormLabel>
+                <FormLabel>Rate your visit</FormLabel>
                 <HStack spacing={1}>
                   {renderStars()}
                 </HStack>
@@ -242,12 +310,12 @@ function CreatePost() {
             </FormControl>
           )}
 
-          <FormControl>
+          <FormControl isRequired>
             <FormLabel>Description</FormLabel>
             <Textarea value={body} onChange={(e) => setBody(e.target.value)} />
           </FormControl>
 
-          <FormControl>
+          <FormControl isRequired>
             <FormLabel>Upload Image</FormLabel>
             <Input type="file" onChange={handleImageChange} />
             {uploadProgress > 0 && uploadProgress < 100 && (

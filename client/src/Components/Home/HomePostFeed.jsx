@@ -24,13 +24,13 @@ const HomePostFeed = () => {
           // Simulate "Apply" button click for presetLocation
           const filters = { selectedCountry: presetLocation };
           const response = await axios.post('http://localhost:3001/api/filters', filters);
-  
+
           if (response.data.message) {
             setNoPostsMessage(response.data.message);
             setPosts([]);
           } else {
             const postsData = response.data.posts;
-  
+
             // Fetch image URLs for each post
             const postsWithImages = await Promise.all(
               postsData.map(async (post) => {
@@ -41,7 +41,7 @@ const HomePostFeed = () => {
                 return post;
               })
             );
-  
+
             setPosts(postsWithImages);
             setNoPostsMessage('');
           }
@@ -49,7 +49,7 @@ const HomePostFeed = () => {
           // Fetch all posts if no presetLocation is set
           const response = await axios.get('http://localhost:3001/api/posts');
           const postsData = response.data;
-  
+
           // Fetch image URLs for each post
           const postsWithImages = await Promise.all(
             postsData.map(async (post) => {
@@ -60,7 +60,7 @@ const HomePostFeed = () => {
               return post;
             })
           );
-  
+
           setPosts(postsWithImages);
         }
       } catch (error) {
@@ -70,10 +70,10 @@ const HomePostFeed = () => {
         setLoading(false);
       }
     };
-  
+
     fetchPosts();
   }, [presetLocation]);
-  
+
 
   // Calculate the posts to display on the current page
   const indexOfLastPost = currentPage * postsPerPage;
@@ -107,7 +107,7 @@ const HomePostFeed = () => {
     } catch (error) {
       console.error('Error fetching filtered posts:', error.response || error);
       setNoPostsMessage(`Error fetching filtered posts: ${error.response?.data?.error || error.message}`)
-   } finally {
+    } finally {
       setLoading(false)
     }
   }
@@ -148,7 +148,7 @@ const HomePostFeed = () => {
 
 const Post = ({ post }) => {
   const [votes, setVotes] = useState(post.upvotes - post.downvotes);
-  const [userVote, setUserVote] = useState(0); // 0: no vote, 1: upvoted, -1: downvoted
+  const [userVote, setUserVote] = useState(0);
   const [isBookmarked, setIsBookmarked] = useState(false);
   const navigate = useNavigate();
 
@@ -159,6 +159,10 @@ const Post = ({ post }) => {
     const isAlreadyBookmarked = bookmarks.some((bookmark) => bookmark._id === post._id);
     setIsBookmarked(isAlreadyBookmarked);
   }, [post._id]);
+
+  useEffect(() => {
+    setVotes(post.upvotes - post.downvotes);
+  }, [post.upvotes, post.downvotes]);
 
   const handleUpvote = () => {
     if (userVote === 1) {
@@ -186,6 +190,8 @@ const Post = ({ post }) => {
     }
   };
 
+
+
   const handleBookmark = (e) => {
     e.stopPropagation();
     const storedBookmarks = localStorage.getItem("bookmarkedPosts");
@@ -208,10 +214,10 @@ const Post = ({ post }) => {
   };
 
   const viewInGoogleMaps = (e) => {
-    e.stopPropagation(); 
+    e.stopPropagation();
     const query = encodeURIComponent(post.location.description);
     const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${query}`;
-    window.open(googleMapsUrl, '_blank'); 
+    window.open(googleMapsUrl, '_blank');
   };
 
   return (
@@ -219,6 +225,7 @@ const Post = ({ post }) => {
       <VStack spacing={4} align="start">
         <HStack spacing={4} align="start" w="100%">
           <VStack spacing={2} align="center">
+            userVote === -1 ? 'red' : 'gray'
             <IconButton
               icon={<ArrowUpIcon />}
               aria-label="Upvote"
@@ -244,7 +251,7 @@ const Post = ({ post }) => {
           </Link>
         </HStack>
         <HStack mt={4} pt={4} w="100%" justify="flex-end" spacing={4}>
-          <Button colorScheme="#004f32" variant="outline" onClick={viewInGoogleMaps}>View in Google Maps</Button>
+          <Button colorScheme="teal" variant="outline" onClick={viewInGoogleMaps}>View in Google Maps</Button>
           <IconButton
             icon={<StarIcon />}
             aria-label="Bookmark"
@@ -254,7 +261,8 @@ const Post = ({ post }) => {
         </HStack>
       </VStack>
     </Box>
-  );
-};
+  )
+}
+
 
 export default HomePostFeed;

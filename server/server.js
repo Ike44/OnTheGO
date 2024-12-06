@@ -5,7 +5,7 @@ require('dotenv').config({ path: require('find-config')('.env') });
 
 const postRoutes = require('./routes/postsRoutes');
 const plannerRoutes = require('./routes/plannerRoutes');
-const commentsRoute = require('./routes/commentsRoutes');
+const commentsRoutes = require('./routes/commentsRoutes');
 const bookmarkRoutes = require('./routes/bookmarksRoutes');
 const apiRoutes = require('./routes/apiRoutes');
 const imageRoutes = require('./routes/imageRoutes');
@@ -23,7 +23,7 @@ app.use(express.json());
 // Routes
 app.use('/api/posts', postRoutes);
 app.use('/api/planner', plannerRoutes);
-app.use('/api/comments', commentsRoute);
+app.use('/api/comments', commentsRoutes);
 app.use('/api/bookmarks', bookmarkRoutes);
 app.use('/api', apiRoutes);
 app.use('/images', imageRoutes);
