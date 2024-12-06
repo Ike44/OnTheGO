@@ -281,9 +281,8 @@ function CreatePost() {
               <option value="Hidden gems">Hidden Gems</option>
               <option value="Landmarks">Landmarks</option>
               <option value="Mountains">Mountains</option>
-              <option value="Restaurant">Restaurant</option>
+              <option value="Restaurant">Restaurants</option>
               <option value="Transportation">Transportation</option>
-              <option value="Landmarks">Landmarks</option>
 
             </Select>
           </FormControl>
