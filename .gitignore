@@ -13,3 +13,4 @@ coverage/
 # Ignore specific scripts
 removeOldPosts.js
 uploadAwsInfo.js
+deleteAllPosts.js

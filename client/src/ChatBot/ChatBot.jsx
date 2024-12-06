@@ -9,6 +9,7 @@ const ChatBot = () => {
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState('');
   const [iteration, setIteration] = useState(0);
+  const [threadId, setThreadId] = useState(null);
   
   const chatSessionRef = useRef(null);
   const textAreaRef = useRef(null);
@@ -67,8 +68,13 @@ const ChatBot = () => {
       setMessages(newMessages);
 
       try {
-        const response = await axios.post('http://localhost:3001/api/chatbot/chat', { message: inputMessage });
-        const reply = response.data.reply;
+        const response = await axios.post('http://localhost:3001/api/chatbot/chat', { 
+          message: inputMessage,
+          threadId: threadId 
+        });
+        
+        const { reply, threadId: newThreadId } = response.data;
+        setThreadId(newThreadId);
 
         setMessages([...newMessages, {
           type: 'reply',
