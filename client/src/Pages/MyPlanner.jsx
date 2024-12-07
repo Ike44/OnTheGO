@@ -6,16 +6,17 @@ import { List, ListItem } from '@chakra-ui/react';
 
 
 
+
 const MyPlanner = () => {
 
     const [trips, setTrips] = useState([]);
     const [completedTrips, setCompletedTrips] = useState([]);
     const [tripDetails, setTripDetails] = useState({
         title: '',
-        description: '', // Replaced country and location with description
+        description: '',
         startDate: '',
         endDate: '',
-        activities: [{ name: '', notes: '' }]
+        activities: [{ name: '', notes: '', location: '' }]
     });
     const [viewIndex, setViewIndex] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -45,7 +46,7 @@ const MyPlanner = () => {
     const handleAddActivity = () => {
         setTripDetails(prev => ({
             ...prev,
-            activities: [...prev.activities, { name: '', notes: '' }]
+            activities: [...prev.activities, { name: '', notes: '', location: '' }]
         }));
     };
 
@@ -56,31 +57,40 @@ const MyPlanner = () => {
         }));
     };
 
-    const handleActivityChange = async (index, field, value) => {
+    // const handleActivityChange = async (index, field, value) => {
+    //     setTripDetails(prev => {
+    //         const updatedActivities = [...prev.activities];
+    //         updatedActivities[index][field] = value; // Update the activity name in the state
+    //         return { ...prev, activities: updatedActivities };
+    //     });
+    
+
+        const handleActivityChange = async (index, field, value) => {
         setTripDetails(prev => {
             const updatedActivities = [...prev.activities];
-            updatedActivities[index][field] = value; // Update the activity name in the state
+            updatedActivities[index][field] = value; // Handles name, notes, or location
             return { ...prev, activities: updatedActivities };
         });
     
-        // Fetch suggestions for the "Activity Name"
-        if (field === 'name' && value.length > 1) {
+        // Fetch suggestions only for "name"
+        if (field === 'location' && value.length > 1) {
             try {
-                const suggestions = await getPlaceSuggestions(value); // API call to fetch suggestions
-                setActivitySuggestions(suggestions); // Store suggestions in the state
+                const suggestions = await getPlaceSuggestions(value); // API call for suggestions
+                setActivitySuggestions(suggestions); // Store suggestions in state
             } catch (error) {
                 console.error('Error fetching activity suggestions:', error);
-                setActivitySuggestions([]); // Clear suggestions on error
+                setActivitySuggestions([]);
             }
         } else {
-            setActivitySuggestions([]); // Clear suggestions if input is too short
+            setActivitySuggestions([]);
         }
     };
+    
 
     const handleSuggestionClick = (index, suggestion) => {
         setTripDetails(prev => {
             const updatedActivities = [...prev.activities];
-            updatedActivities[index].name = suggestion.description; // Set the selected suggestion as the activity name
+            updatedActivities[index].location = suggestion.description; // Set the selected suggestion as the activity name
             return { ...prev, activities: updatedActivities };
         });
         setActivitySuggestions([]); // Clear the suggestion list
@@ -112,7 +122,7 @@ const MyPlanner = () => {
             setTrips(updatedTrips);
             setViewIndex(null);
         }
-        setTripDetails({ title: '', description: '', startDate: '', endDate: '', activities: [{ name: '', notes: '' }] });
+        setTripDetails({ title: '', description: '', startDate: '', endDate: '', activities: [{ name: '', notes: '', location: '' }] });
         setIsModalOpen(false);
 
         setActiveTab('plannedTrips');
@@ -175,7 +185,7 @@ const MyPlanner = () => {
             }
         }
         setViewIndex(null);
-        setTripDetails({ title: '', description: '', startDate: '', endDate: '', activities: [{ name: '', notes: '' }] });
+        setTripDetails({ title: '', description: '', startDate: '', endDate: '', activities: [{ name: '', notes: '', location: '' }] });
         setIsModalOpen(false);
     };
 
@@ -191,11 +201,6 @@ const MyPlanner = () => {
         }
     };
     
-    
-    // const handleOpenEditPopup = () => { 
-    //     setIsEditPopupOpen(true); 
-    //     setTripDetails(trips[viewIndex]);
-    // }; 
 
     const handleCloseEditPopup = () => { 
         setIsEditPopupOpen(false); 
@@ -360,20 +365,38 @@ const MyPlanner = () => {
             onChange={(e) => handleActivityChange(index, 'name', e.target.value)}
             style={styles.input}
         />
-        {/* Render suggestions list below the Activity Name input */}
+        <input
+            type="text"
+            placeholder="Location"
+            value={activity.location} // Ensure this references activity.location
+            onChange={(e) => handleActivityChange(index, 'location', e.target.value)} // Ensure updates work correctly
+            style={styles.input}
+        />
         {activitySuggestions.length > 0 && (
-            <List style={{ position: 'absolute', zIndex: 10, backgroundColor: 'white', border: '1px solid #ddd', width: '100%' }}>
-                {activitySuggestions.map((suggestion, i) => (
-                    <ListItem
-                        key={i}
-                        onClick={() => handleSuggestionClick(index, suggestion)}
-                        style={{ padding: '5px', cursor: 'pointer', borderBottom: '1px solid #eee' }}
-                    >
-                        {suggestion.description}
-                    </ListItem>
-                ))}
-            </List>
-        )}
+    <List
+        style={{
+            position: 'absolute',
+            zIndex: 10,
+            backgroundColor: 'white',
+            border: '1px solid #ddd',
+            width: '100%',
+        }}
+    >
+        {activitySuggestions.map((suggestion, i) => (
+            <ListItem
+                key={i}
+                onClick={() => handleSuggestionClick(index, suggestion)}
+                style={{
+                    padding: '5px',
+                    cursor: 'pointer',
+                    borderBottom: '1px solid #eee',
+                }}
+            >
+                {suggestion.description} {/* Adjust based on the suggestion's structure */}
+            </ListItem>
+        ))}
+    </List>
+)}
         <textarea
             placeholder="Notes"
             value={activity.notes}
@@ -466,6 +489,14 @@ const MyPlanner = () => {
                                 onChange={(e) => handleActivityChange(index, 'name', e.target.value)}
                                 style={styles.input}
                             />
+
+<input
+            type="text"
+            placeholder="Location"
+            value={activity.location}
+            onChange={(e) => handleActivityChange(index, 'location', e.target.value)}
+            style={styles.input}
+        />
                             {/* Render suggestions list below the Activity Name input */}
                             {activitySuggestions.length > 0 && (
                                 <List
@@ -524,8 +555,8 @@ const MyPlanner = () => {
 )}
 
         </div>
-    );
-};
+    )
+    };
 
 // CSS styles
 const styles = {
@@ -583,6 +614,8 @@ const styles = {
         margin: '10px 0',
         padding: '8px',
         fontSize: '16px',
+        marginRight: '10px', // Add spacing between input fields
+        flex: 1, 
     },
     buttonContainer: {
         display: 'flex',
@@ -613,6 +646,11 @@ const styles = {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
+    },
+    textarea: {
+        padding: '8px',
+        fontSize: '16px',
+        flex: 2, // Give more space to the notes field
     },
 };
 
